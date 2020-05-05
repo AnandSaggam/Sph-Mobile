@@ -1,12 +1,17 @@
-package com.dlminfosoft.sphmobile
+package com.dlminfosoft.sphmobile.activity
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.dlminfosoft.sphmobile.R
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        setup()
+    }
+
+    override fun setup() {
+
     }
 }
