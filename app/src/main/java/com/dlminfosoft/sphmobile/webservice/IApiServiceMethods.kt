@@ -13,7 +13,7 @@ interface IApiServiceMethods {
 
 
     @GET(Constants.METHOD_GET_DATA_USAGE)
-    fun getUsageDetails(@Query(Constants.FIELD_RESOURCE_ID) resourceId: String = Constants.FIELD_RESOURCE_ID_VALUE): Call<GetUsageResponse>
+    fun getDataUsageDetails(@Query(Constants.FIELD_RESOURCE_ID) resourceId: String = Constants.FIELD_RESOURCE_ID_VALUE): Call<GetUsageResponse>
 
 
     companion object Factory {

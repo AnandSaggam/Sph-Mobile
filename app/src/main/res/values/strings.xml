@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">SphMobile</string>
+    <string name="internet_available">Internet Available</string>
+    <string name="no_internet">Internet not available</string>
 </resources>
