@@ -1,6 +1,6 @@
 package com.dlminfosoft.sphmobile.model
 
-data class GetUsageResponse(val success: Boolean, val result: ResultData)
+data class UsageDataResponse(val success: Boolean, val result: ResultData)
 
 data class ResultData(
     val records: ArrayList<RecordsData>, val total: Int, val offset: Int = 0, val limit: Int = 0

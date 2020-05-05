@@ -5,7 +5,6 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 
-
 class Constants {
     companion object {
         const val BASE_URL = "https://data.gov.sg/api/action/"
