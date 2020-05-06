@@ -7,9 +7,11 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-
 object Repository {
 
+    /*
+    * Call getDataUsageDetails() Api
+    */
     fun callDataUsageApi(): MutableLiveData<UsageDataResponse> {
         val responseLiveData = MutableLiveData<UsageDataResponse>()
 

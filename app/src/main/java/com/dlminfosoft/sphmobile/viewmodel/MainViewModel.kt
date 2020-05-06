@@ -6,23 +6,17 @@ import androidx.lifecycle.MutableLiveData
 import com.dlminfosoft.sphmobile.model.UsageDataResponse
 import com.dlminfosoft.sphmobile.model.YearlyRecord
 import com.dlminfosoft.sphmobile.repository.Repository
-import com.dlminfosoft.sphmobile.utility.Constants
 import java.util.TreeMap
 import kotlin.collections.ArrayList
 
 class MainViewModel(private val app: Application) : AndroidViewModel(app) {
 
     private var dataUsageResponse = MutableLiveData<UsageDataResponse>()
-    private val isInternetError = MutableLiveData<Boolean>()
     /*
     *  Invoke to repository method callDataUsageApi() for api call
     */
     fun callDataUsageDetails() {
-        if (Constants.isInternetAvailable(app)) {
-            dataUsageResponse = Repository.callDataUsageApi()
-        } else {
-            isInternetError.value = true
-        }
+        dataUsageResponse = Repository.callDataUsageApi()
     }
 
     /*
@@ -110,12 +104,4 @@ class MainViewModel(private val app: Application) : AndroidViewModel(app) {
             isDecreaseVolumeData,
             decreaseVolumeQuarterKey
         )
-
-
-    /*
-    * Observable for internet connection
-    */
-    fun getInternetErrorObservable(): MutableLiveData<Boolean> {
-        return isInternetError
-    }
 }

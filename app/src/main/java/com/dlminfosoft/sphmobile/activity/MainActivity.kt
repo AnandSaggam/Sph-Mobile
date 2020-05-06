@@ -1,12 +1,14 @@
 package com.dlminfosoft.sphmobile.activity
 
 import android.os.Bundle
+import android.view.View
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dlminfosoft.sphmobile.R
 import com.dlminfosoft.sphmobile.adapter.AdapterDataUsage
 import com.dlminfosoft.sphmobile.model.YearlyRecord
+import com.dlminfosoft.sphmobile.utility.Constants
 import com.dlminfosoft.sphmobile.viewmodel.MainViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -34,7 +36,24 @@ class MainActivity : BaseActivity() {
         )
 
         recycle_view_data_usage.adapter = mAdapter
-        mainViewModel.callDataUsageDetails()
+        loadData(true)
+
+
+        swipe_to_refresh_list.setOnRefreshListener {
+            clearList()
+            loadData(false)
+        }
+    }
+
+    private fun loadData(showProgress: Boolean) {
+        if (Constants.isInternetAvailable(this)) {
+            if (showProgress) showLoading()
+            mainViewModel.callDataUsageDetails()
+        } else {
+            if (!showProgress)
+                swipe_to_refresh_list.isRefreshing = false
+            showSnackBar(getString(R.string.no_internet))
+        }
         mainViewModel.getListDataObservable().observe(this, Observer { response ->
             when {
                 response != null -> {
@@ -53,11 +72,21 @@ class MainActivity : BaseActivity() {
                     showSnackBar(getString(R.string.something_went_wrong))
                 }
             }
+            swipe_to_refresh_list.isRefreshing = false
+            hideLoading()
         })
-        mainViewModel.getInternetErrorObservable().observe(this, Observer {
-            if (it) {
-                showSnackBar(getString(R.string.no_internet))
-            }
-        })
+    }
+
+    private fun clearList() {
+        yearlyRecordList.clear()
+        mAdapter.setDataList(yearlyRecordList)
+    }
+
+    private fun hideLoading() {
+        progressBar.visibility = View.GONE
+    }
+
+    private fun showLoading() {
+        progressBar.visibility = View.VISIBLE
     }
 }
