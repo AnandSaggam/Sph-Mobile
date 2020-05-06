@@ -2,6 +2,7 @@ package com.dlminfosoft.sphmobile.activity
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,28 +24,52 @@ class MainActivity : BaseActivity() {
         setup()
     }
 
+    /*
+    *  Lambda function pass as argument in adapter to show alert dialog
+    */
+    var performOnImgBtnClick = { record: YearlyRecord ->
+        val value = record.hashMapWithDataUsage.getValue(record.decreaseVolumeQuarterKey)
+        val message =
+            "${record.year} - ${record.decreaseVolumeQuarterKey} ${getString(R.string.message_decrease_volume)} $value"
+        showAlertDialog(getString(R.string.alert_title), message)
+    }
+
+    /*
+    *  Initializer method
+    */
     override fun setup() {
         mainViewModel = ViewModelProvider(this).get(MainViewModel::class.java)
         recycle_view_data_usage.layoutManager = LinearLayoutManager(this)
         mAdapter = AdapterDataUsage(
-            this, ArrayList(), onImgBtnClickCallback = {
-                val value = it.hashMapWithDataUsage.getValue(it.decreaseVolumeQuarterKey)
-                val message =
-                    "${it.year} - ${it.decreaseVolumeQuarterKey} ${getString(R.string.message_decrease_volume)} $value"
-                showAlertDialog(getString(R.string.alert_title), message)
-            }
+            this, ArrayList(), performOnImgBtnClick
         )
 
         recycle_view_data_usage.adapter = mAdapter
         loadData(true)
 
-
+        /*
+        *  Swipe to refresh listener
+        */
         swipe_to_refresh_list.setOnRefreshListener {
             clearList()
             loadData(false)
         }
+
+        /*
+        * Set different colors of loading
+        */
+        swipe_to_refresh_list.setColorSchemeColors(
+            ContextCompat.getColor(this, android.R.color.holo_blue_bright),
+            ContextCompat.getColor(this, android.R.color.holo_green_light),
+            ContextCompat.getColor(this, android.R.color.holo_red_light),
+            ContextCompat.getColor(this, android.R.color.holo_red_light)
+        )
+
     }
 
+    /*
+    *  Call viewModel method to get data and Observer the response
+    */
     private fun loadData(showProgress: Boolean) {
         if (Constants.isInternetAvailable(this)) {
             if (showProgress) showLoading()
@@ -54,6 +79,7 @@ class MainActivity : BaseActivity() {
                 swipe_to_refresh_list.isRefreshing = false
             showSnackBar(getString(R.string.no_internet))
         }
+
         mainViewModel.getListDataObservable().observe(this, Observer { response ->
             when {
                 response != null -> {
@@ -77,15 +103,24 @@ class MainActivity : BaseActivity() {
         })
     }
 
+    /*
+    * Clear list data when do swipe to refresh
+    */
     private fun clearList() {
         yearlyRecordList.clear()
         mAdapter.setDataList(yearlyRecordList)
     }
 
+    /*
+    * Hiding progress bar
+    */
     private fun hideLoading() {
         progressBar.visibility = View.GONE
     }
 
+    /*
+    * Showing progress bar
+    */
     private fun showLoading() {
         progressBar.visibility = View.VISIBLE
     }

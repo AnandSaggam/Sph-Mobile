@@ -16,6 +16,9 @@ interface IApiServiceMethods {
     fun getDataUsageDetails(@Query(Constants.FIELD_RESOURCE_ID) resourceId: String = Constants.FIELD_RESOURCE_ID_VALUE): Call<UsageDataResponse>
 
 
+    /*
+    * Create retrofit singleton instance
+    */
     companion object Factory {
         fun createRetrofit(): IApiServiceMethods {
             val retrofit = Retrofit.Builder()

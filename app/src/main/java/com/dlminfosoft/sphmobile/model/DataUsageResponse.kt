@@ -1,5 +1,8 @@
 package com.dlminfosoft.sphmobile.model
 
+/*
+* This class hold response of getUserDetails api
+*/
 data class UsageDataResponse(val success: Boolean, val result: ResultData)
 
 data class ResultData(
