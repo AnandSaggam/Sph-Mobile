@@ -1,35 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginStart="@dimen/margin_16dp"
-    android:layout_marginTop="@dimen/margin_8dp"
-    android:layout_marginEnd="@dimen/margin_16dp"
-    android:layout_marginBottom="@dimen/margin_8dp"
-    app:cardCornerRadius="@dimen/card_corner_radius"
-    app:cardElevation="@dimen/card_elevation">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="record"
+            type="com.dlminfosoft.sphmobile.model.YearlyRecord" />
+
+        <variable
+            name="decimal"
+            type="java.text.DecimalFormat" />
+
+        <variable
+            name="listener"
+            type="com.dlminfosoft.sphmobile.adapter.AdapterDataUsage.ClickHandler" />
+
+    </data>
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="@dimen/padding_8dp">
+        android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/txt_year"
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@android:color/black"
-            android:textSize="@dimen/text_size_16" />
+            android:layout_marginStart="@dimen/margin_16dp"
+            android:layout_marginTop="@dimen/margin_8dp"
+            android:layout_marginEnd="@dimen/margin_16dp"
+            android:layout_marginBottom="@dimen/margin_8dp"
+            app:cardCornerRadius="@dimen/card_corner_radius"
+            app:cardElevation="@dimen/card_elevation">
 
-        <ImageView
-            android:id="@+id/img_btn_decrease"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_alignParentEnd="true"
-            android:background="?android:attr/selectableItemBackground"
-            android:contentDescription="@string/decrease_image_content"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_toolbar_arrow_down" />
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="@dimen/padding_16dp">
+
+                <TextView
+                    android:id="@+id/txt_year"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@{`Year: `+record.component1()}"
+                    android:textColor="@android:color/black"
+                    android:textSize="@dimen/text_size_18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txt_total_volume"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/txt_year"
+                    android:text="@{`Consumed Data Volume: `+decimal.format(record.component3())}"
+                    android:textColor="@android:color/black"
+                    android:textSize="@dimen/text_size_16sp" />
+
+                <ImageView
+                    android:id="@+id/img_btn_decrease"
+                    android:layout_width="@dimen/height_width_30dp"
+                    android:layout_height="@dimen/height_width_30dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerInParent="true"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/decrease_image_content"
+                    android:onClick="@{() -> listener.test(record)}"
+                    android:src="@drawable/ic_toolbar_arrow_down"
+                    android:visibility="@{record.component4() ? View.VISIBLE : View.GONE}" />
+            </RelativeLayout>
+        </androidx.cardview.widget.CardView>
     </RelativeLayout>
-</androidx.cardview.widget.CardView>
+</layout>

@@ -25,7 +25,12 @@ class MainActivity : BaseActivity() {
         mainViewModel = ViewModelProvider(this).get(MainViewModel::class.java)
         recycle_view_data_usage.layoutManager = LinearLayoutManager(this)
         mAdapter = AdapterDataUsage(
-            this, ArrayList()
+            this, ArrayList(), onImgBtnClickCallback = {
+                val value = it.hashMapWithDataUsage.getValue(it.decreaseVolumeQuarterKey)
+                val message =
+                    "${it.year} - ${it.decreaseVolumeQuarterKey} ${getString(R.string.message_decrease_volume)} $value"
+                showAlertDialog(getString(R.string.alert_title), message)
+            }
         )
 
         recycle_view_data_usage.adapter = mAdapter
