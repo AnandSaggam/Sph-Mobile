@@ -5,8 +5,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 
-class Constants {
-    companion object {
+object Constants {
         const val BASE_URL = "https://data.gov.sg/api/action/"
         const val METHOD_GET_DATA_USAGE = "datastore_search"
         const val FIELD_RESOURCE_ID = "resource_id"
@@ -37,6 +36,4 @@ class Constants {
             }
             return false
         }
-
-    }
 }

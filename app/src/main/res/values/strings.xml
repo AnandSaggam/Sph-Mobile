@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">SphMobile</string>
-    <string name="no_internet">Internet not available</string>
+    <string name="no_internet">Please check internet connection and try again</string>
     <string name="no_record_available">No records available to display</string>
     <string name="something_went_wrong">Something went wrong please try again.</string>
+    <string name="ok">OK</string>
+    <string name="alert_title">Message</string>
+    <string name="decrease_image_content">Display decrease data image</string>
 </resources>
