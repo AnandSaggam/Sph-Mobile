@@ -26,7 +26,6 @@ object Constants {
     const val COLUMN_NAME_DECREASE_QUARTER_KEY = "DecreaseQuarterKey"
     const val COLUMN_NAME_DATA_USAGE = "DataUsage"
 
-
     /*
     * Check and return result of internet connectivity
     */

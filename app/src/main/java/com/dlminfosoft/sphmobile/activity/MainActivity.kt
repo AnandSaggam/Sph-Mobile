@@ -28,7 +28,7 @@ class MainActivity : BaseActivity() {
     *  Lambda function pass as argument in adapter to show alert dialog
     */
     var performOnImgBtnClick = { record: YearlyRecord ->
-        val value = record.hashMapWithDataUsage.getValue(record.decreaseVolumeQuarterKey)
+        val value = record.treeMapWithDataUsage.getValue(record.decreaseVolumeQuarterKey)
         val message =
             "${record.year} - ${record.decreaseVolumeQuarterKey} ${getString(R.string.message_decrease_volume)} $value"
         showAlertDialog(getString(R.string.alert_title), message)
@@ -45,14 +45,13 @@ class MainActivity : BaseActivity() {
         )
 
         recycle_view_data_usage.adapter = mAdapter
-        loadData(true)
+        loadData(false)
 
         /*
         *  Swipe to refresh listener
         */
         swipe_to_refresh_list.setOnRefreshListener {
-            clearList()
-            loadData(false)
+            loadData(true)
         }
 
         /*
@@ -69,30 +68,37 @@ class MainActivity : BaseActivity() {
     /*
     *  Call viewModel method to get data and Observer the response
     */
-    private fun loadData(showProgress: Boolean) {
-        if (Constants.isInternetAvailable(this)) {
-            if (showProgress) showLoading()
-            mainViewModel.callDataUsageDetails()
-        } else {
-            if (!showProgress)
+    private fun loadData(isFromSwipeToRefresh: Boolean) {
+        if (Constants.isInternetAvailable(this) || !isFromSwipeToRefresh) {
+            if (!isFromSwipeToRefresh) showLoading()
+            else clearList()
+
+            mainViewModel.callDataUsageDetails(Constants.isInternetAvailable(this))
+
+            mainViewModel.yearlyRecordListObservable().observe(this, Observer { response ->
+                if (response != null && response.isSuccess) {
+                    if (response.recordList.isNotEmpty()) {
+                        yearlyRecordList = response.recordList
+                        mAdapter.setDataList(yearlyRecordList)
+                        if (!isFromSwipeToRefresh && !Constants.isInternetAvailable(this))
+                            showAlertDialog(
+                                getString(R.string.title_internet_not_available),
+                                getString(R.string.message_data_from_local_db)
+                            )
+                    } else {
+                        if (!isFromSwipeToRefresh) showSnackBar(getString(R.string.no_internet))
+                        else showSnackBar(getString(R.string.no_record_available))
+                    }
+                } else {
+                    showSnackBar(getString(R.string.something_went_wrong))
+                }
                 swipe_to_refresh_list.isRefreshing = false
+                hideLoading()
+            })
+        } else {
+            swipe_to_refresh_list.isRefreshing = false
             showSnackBar(getString(R.string.no_internet))
         }
-
-        mainViewModel.yearlyRecordListObservable().observe(this, Observer { response ->
-            if (response != null && response.isSuccess) {
-                if (response.recordList.isNotEmpty()) {
-                    yearlyRecordList = response.recordList
-                    mAdapter.setDataList(yearlyRecordList)
-                } else {
-                    showSnackBar(getString(R.string.no_record_available))
-                }
-            } else {
-                showSnackBar(getString(R.string.something_went_wrong))
-            }
-            swipe_to_refresh_list.isRefreshing = false
-            hideLoading()
-        })
     }
 
     /*

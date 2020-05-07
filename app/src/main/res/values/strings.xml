@@ -7,4 +7,7 @@
     <string name="alert_title">Message</string>
     <string name="decrease_image_content">Display decrease data image</string>
     <string name="message_decrease_volume">has decrease in volume data, consume only</string>
+    <string name="title_internet_not_available">No Internet</string>
+    <string name="message_data_from_local_db">Data displayed from local database</string>
+
 </resources>

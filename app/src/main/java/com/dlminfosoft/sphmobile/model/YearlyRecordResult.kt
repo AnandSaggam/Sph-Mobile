@@ -16,7 +16,7 @@ data class YearlyRecordResult(
 */
 data class YearlyRecord(
     val year: String,
-    val hashMapWithDataUsage: TreeMap<String, Double>,
+    val treeMapWithDataUsage: TreeMap<String, Double>,
     val totalVolume: Double,
     val isDecreaseVolumeData: Boolean = false,
     val decreaseVolumeQuarterKey: String = ""
