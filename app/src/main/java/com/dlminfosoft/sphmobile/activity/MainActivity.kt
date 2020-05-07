@@ -73,7 +73,7 @@ class MainActivity : BaseActivity() {
             if (!isFromSwipeToRefresh) showLoading()
             else clearList()
 
-            mainViewModel.callDataUsageDetails(Constants.isInternetAvailable(this))
+            mainViewModel.getListOfData(Constants.isInternetAvailable(this))
 
             mainViewModel.yearlyRecordListObservable().observe(this, Observer { response ->
                 if (response != null && response.isSuccess) {

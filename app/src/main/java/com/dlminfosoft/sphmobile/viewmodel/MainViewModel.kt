@@ -18,7 +18,7 @@ class MainViewModel(private val app: Application) : AndroidViewModel(app) {
     /*
     *  Invoke to repository method callDataUsageApi() for api call
     */
-    fun callDataUsageDetails(internetAvailable: Boolean) {
+    fun getListOfData(internetAvailable: Boolean) {
         dataUsageResponseYearlyRecord = Repository.makeCallToGetYearlyRecords(internetAvailable)
     }
 

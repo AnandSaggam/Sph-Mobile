@@ -24,7 +24,6 @@ import kotlin.coroutines.CoroutineContext
 object Repository : CoroutineScope {
 
     private lateinit var yearlyRecordDao: YearlyRecordDao
-    private val responseLiveData = MutableLiveData<YearlyRecordResult>()
 
     /*
     * Getting instance of YearlyRecordDao to make database operation
@@ -64,8 +63,8 @@ object Repository : CoroutineScope {
     * If network available fetch data from server else fetch from local database
     */
     fun makeCallToGetYearlyRecords(internetAvailable: Boolean): MutableLiveData<YearlyRecordResult> {
+        val responseLiveData = MutableLiveData<YearlyRecordResult>()
 
-        if (responseLiveData.value != null) return responseLiveData
         if (internetAvailable) {
             IApiServiceMethods.createRetrofit().getDataUsageDetails()
                 .enqueue(object : Callback<UsageDataResponse> {
