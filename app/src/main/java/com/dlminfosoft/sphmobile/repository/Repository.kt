@@ -3,13 +3,10 @@ package com.dlminfosoft.sphmobile.repository
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.dlminfosoft.sphmobile.database.YearlyRecordDao
-import com.dlminfosoft.sphmobile.database.YearlyRecordTable
 import com.dlminfosoft.sphmobile.model.UsageDataResponse
 import com.dlminfosoft.sphmobile.model.YearlyRecord
 import com.dlminfosoft.sphmobile.model.YearlyRecordResult
 import com.dlminfosoft.sphmobile.webservice.IApiServiceMethods
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -17,42 +14,58 @@ import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.lang.reflect.Type
 import java.util.TreeMap
 import kotlin.collections.ArrayList
 import kotlin.coroutines.CoroutineContext
 
-
+/*
+* This class handle all the network operation and database CRUD operations
+*/
 object Repository : CoroutineScope {
 
     private lateinit var yearlyRecordDao: YearlyRecordDao
+    private val responseLiveData = MutableLiveData<YearlyRecordResult>()
 
+    /*
+    * Getting instance of YearlyRecordDao to make database operation
+    */
     fun initDao(dao: YearlyRecordDao) {
         yearlyRecordDao = dao
     }
 
-    private suspend fun insert(yearlyRecord: ArrayList<YearlyRecordTable>) {
+    /*
+    * Insert list of records in YearlyRecords table
+    */
+    private suspend fun insertIntoTable(yearlyRecord: ArrayList<YearlyRecord>) {
+        // Do insertion in background thread using coroutine
         withContext(Dispatchers.IO) {
+            deleteAllRecord()
             yearlyRecordDao.insertAll(yearlyRecord)
         }
     }
 
+    /*
+    * Delete all records from YearlyRecords table
+    */
     private suspend fun deleteAllRecord() {
         withContext(Dispatchers.IO) {
             yearlyRecordDao.deleteAllRecords()
         }
     }
 
-    private suspend fun getAllUserList(): List<YearlyRecordTable> {
+    /*
+    * Retrieving list of records YearlyRecords table
+    */
+    private suspend fun getAllRecordsFromTable(): List<YearlyRecord> {
         return yearlyRecordDao.getAllRecordsList()
     }
 
     /*
-    * Make network call to fetch data
+    * If network available fetch data from server else fetch from local database
     */
-    fun getYearlyRecords(internetAvailable: Boolean): MutableLiveData<YearlyRecordResult> {
-        val responseLiveData = MutableLiveData<YearlyRecordResult>()
+    fun makeCallToGetYearlyRecords(internetAvailable: Boolean): MutableLiveData<YearlyRecordResult> {
 
+        if (responseLiveData.value != null) return responseLiveData
         if (internetAvailable) {
             IApiServiceMethods.createRetrofit().getDataUsageDetails()
                 .enqueue(object : Callback<UsageDataResponse> {
@@ -60,18 +73,16 @@ object Repository : CoroutineScope {
                         call: Call<UsageDataResponse>,
                         response: Response<UsageDataResponse>
                     ) {
-                        val resultRecord: YearlyRecordResult =
-                            getResultYearlyRecord(response.body())
-                        responseLiveData.value = resultRecord
+                        val recordResult: YearlyRecordResult =
+                            getYearlyRecordResult(response.body())
+                        responseLiveData.value = recordResult
 
                         launch {
-                            deleteAllRecord()
-                        }
-                        launch {
-                            if (resultRecord.recordList.isNotEmpty()) {
-                                insert(preparedDataForInsert(resultRecord.recordList))
+                            if (recordResult.recordList.isNotEmpty()) {
+                                insertIntoTable(recordResult.recordList)
                             }
                         }
+                        Log.e("Record from server", "==>${recordResult.recordList.size}")
                     }
 
                     override fun onFailure(call: Call<UsageDataResponse>, t: Throwable) {
@@ -79,59 +90,23 @@ object Repository : CoroutineScope {
                     }
                 })
         } else {
+            // Launching background thread using coroutines
             launch {
-                val result = getAllUserList()
+                val result = getAllRecordsFromTable()
                 withContext(Dispatchers.Main) {
-                    responseLiveData.value = getYearlyRecordList(result)
-                    Log.e("Record from db", "==>${getYearlyRecordList(result).recordList.size}")
+                    responseLiveData.value =
+                        YearlyRecordResult(true, result as ArrayList<YearlyRecord>)
+                    Log.e("Record from db", "==>${result.size}")
                 }
             }
         }
         return responseLiveData
     }
 
-    private fun getYearlyRecordList(list: List<YearlyRecordTable>?): YearlyRecordResult {
-        val listOfData = ArrayList<YearlyRecord>()
-        val type: Type = object : TypeToken<TreeMap<String, Double>>() {}.type
-        list?.let {
-            for (item in it) {
-
-                val treeMapDataUsage: TreeMap<String, Double> =
-                    Gson().fromJson(item.dataUsageJson, type)
-                val record = getYearlyRecord(
-                    item.year,
-                    treeMapDataUsage,
-                    item.totalVolume,
-                    item.isDecreaseVolumeData,
-                    item.decreaseVolumeQuarterKey
-                )
-                listOfData.add(record)
-            }
-        }
-        return YearlyRecordResult(true, listOfData)
-    }
-
-
-    private fun preparedDataForInsert(recordList: ArrayList<YearlyRecord>): ArrayList<YearlyRecordTable> {
-        val yearlyRecordTableList = ArrayList<YearlyRecordTable>()
-        for (item in recordList) {
-            val jsonDataUsage = Gson().toJson(item.treeMapWithDataUsage)
-            val data = YearlyRecordTable(
-                item.year,
-                item.totalVolume,
-                item.isDecreaseVolumeData,
-                item.decreaseVolumeQuarterKey,
-                jsonDataUsage
-            )
-            yearlyRecordTableList.add(data)
-        }
-        return yearlyRecordTableList
-    }
-
     /*
     * Computing yearly records and return list of records
     */
-    private fun getResultYearlyRecord(response: UsageDataResponse?): YearlyRecordResult {
+    private fun getYearlyRecordResult(response: UsageDataResponse?): YearlyRecordResult {
         val yearlyRecordList = ArrayList<YearlyRecord>()
         try {
             response?.let {
@@ -192,7 +167,7 @@ object Repository : CoroutineScope {
     }
 
     /*
-    * Return instance of YearlyRecord
+    * Create and return instance of YearlyRecord
     */
     private fun getYearlyRecord(
         currentYear: String,

@@ -80,11 +80,8 @@ class MainActivity : BaseActivity() {
                     if (response.recordList.isNotEmpty()) {
                         yearlyRecordList = response.recordList
                         mAdapter.setDataList(yearlyRecordList)
-                        if (!isFromSwipeToRefresh && !Constants.isInternetAvailable(this))
-                            showAlertDialog(
-                                getString(R.string.title_internet_not_available),
-                                getString(R.string.message_data_from_local_db)
-                            )
+                        if (!Constants.isInternetAvailable(this))
+                            showSnackBar(getString(R.string.message_data_from_local_db))
                     } else {
                         if (!isFromSwipeToRefresh) showSnackBar(getString(R.string.no_internet))
                         else showSnackBar(getString(R.string.no_record_available))

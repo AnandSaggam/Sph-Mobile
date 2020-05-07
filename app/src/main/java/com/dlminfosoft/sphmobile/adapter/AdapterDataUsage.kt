@@ -8,7 +8,9 @@ import com.dlminfosoft.sphmobile.databinding.ListItemDataUsageBinding
 import com.dlminfosoft.sphmobile.model.YearlyRecord
 import java.math.RoundingMode
 import java.text.DecimalFormat
-
+/*
+* This class act as bridge between view and data source, to display data in view
+*/
 class AdapterDataUsage(
     context: Context,
     private var dataList: ArrayList<YearlyRecord>,
@@ -48,6 +50,9 @@ class AdapterDataUsage(
         notifyDataSetChanged()
     }
 
+    /*
+    * This class used to handle click event of image buttons
+    */
     class ClickHandler(private val onImgBtnClickCallback: (item: YearlyRecord) -> Unit) {
         fun test(record: YearlyRecord) {
             onImgBtnClickCallback.invoke(record)

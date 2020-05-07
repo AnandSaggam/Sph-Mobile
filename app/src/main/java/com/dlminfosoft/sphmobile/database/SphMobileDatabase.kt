@@ -1,12 +1,12 @@
 package com.dlminfosoft.sphmobile.database
 
 import android.content.Context
-import androidx.room.Database
-import androidx.room.Room
-import androidx.room.RoomDatabase
+import androidx.room.*
+import com.dlminfosoft.sphmobile.model.YearlyRecord
 import com.dlminfosoft.sphmobile.utility.Constants
 
-@Database(entities = [YearlyRecordTable::class], version = 1)
+@Database(entities = [YearlyRecord::class], version = 1)
+@TypeConverters(DbConverters::class)
 abstract class SphMobileDatabase : RoomDatabase() {
 
     abstract fun getYearlyRecordDao(): YearlyRecordDao

@@ -19,12 +19,6 @@ object Constants {
     // Database constants
     const val DATABASE_NAME = "SphMobileDatabase"
     const val YEARLY_RECORD_TABLE_NAME = "YearlyRecords"
-    const val COLUMN_NAME_ID = "_Id"
-    const val COLUMN_NAME_YEAR = "Year"
-    const val COLUMN_NAME_TOTAL_VOLUME = "TotalVolume"
-    const val COLUMN_NAME_IS_DECREASE_VOLUME = "DecreaseVolume"
-    const val COLUMN_NAME_DECREASE_QUARTER_KEY = "DecreaseQuarterKey"
-    const val COLUMN_NAME_DATA_USAGE = "DataUsage"
 
     /*
     * Check and return result of internet connectivity
