@@ -64,7 +64,6 @@ class MainActivity : BaseActivity() {
             ContextCompat.getColor(this, android.R.color.holo_red_light),
             ContextCompat.getColor(this, android.R.color.holo_red_light)
         )
-
     }
 
     /*
@@ -80,23 +79,16 @@ class MainActivity : BaseActivity() {
             showSnackBar(getString(R.string.no_internet))
         }
 
-        mainViewModel.getListDataObservable().observe(this, Observer { response ->
-            when {
-                response != null -> {
-                    if (response.success) {
-                        if (response.result.records.isNotEmpty()) {
-                            yearlyRecordList = mainViewModel.getResultYearlyRecord()
-                            mAdapter.setDataList(yearlyRecordList)
-                        } else {
-                            showSnackBar(getString(R.string.no_record_available))
-                        }
-                    } else {
-                        showSnackBar(getString(R.string.something_went_wrong))
-                    }
+        mainViewModel.yearlyRecordListObservable().observe(this, Observer { response ->
+            if (response != null && response.isSuccess) {
+                if (response.recordList.isNotEmpty()) {
+                    yearlyRecordList = response.recordList
+                    mAdapter.setDataList(yearlyRecordList)
+                } else {
+                    showSnackBar(getString(R.string.no_record_available))
                 }
-                else -> {
-                    showSnackBar(getString(R.string.something_went_wrong))
-                }
+            } else {
+                showSnackBar(getString(R.string.something_went_wrong))
             }
             swipe_to_refresh_list.isRefreshing = false
             hideLoading()
