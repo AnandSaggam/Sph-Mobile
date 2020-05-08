@@ -21,16 +21,10 @@ import kotlin.coroutines.CoroutineContext
 /*
 * This class handle all the network operation and database CRUD operations
 */
-object Repository : CoroutineScope {
-
-    private lateinit var yearlyRecordDao: YearlyRecordDao
-
-    /*
-    * Getting instance of YearlyRecordDao to make database operation
-    */
-    fun initDao(dao: YearlyRecordDao) {
-        yearlyRecordDao = dao
-    }
+class Repository(
+    private val yearlyRecordDao: YearlyRecordDao,
+    private val apiServiceInstance: IApiServiceMethods
+) : CoroutineScope {
 
     /*
     * Insert list of records in YearlyRecords table
@@ -66,7 +60,7 @@ object Repository : CoroutineScope {
         val responseLiveData = MutableLiveData<YearlyRecordResult>()
 
         if (internetAvailable) {
-            IApiServiceMethods.createRetrofit().getDataUsageDetails()
+            apiServiceInstance.getDataUsageDetails()
                 .enqueue(object : Callback<UsageDataResponse> {
                     override fun onResponse(
                         call: Call<UsageDataResponse>,
@@ -114,7 +108,7 @@ object Repository : CoroutineScope {
                     var mapWithDataUsage = TreeMap<String, Double>()
                     var totalVolume = 0.0
 
-                    for (item in it.result.records) {
+                    for (item in response.result.records) {
                         val yearWithQuarter = item.quarter.split("-")
                         if (currentYear == "0000") {
                             // First record of list
@@ -182,6 +176,14 @@ object Repository : CoroutineScope {
             isDecreaseVolumeData,
             decreaseVolumeQuarterKey
         )
+
+//    operator fun invoke(): Repository {
+//
+//    }
+
+//    operator fun invoke(): Repository {
+//
+//    }
 
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main

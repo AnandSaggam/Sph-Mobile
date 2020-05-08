@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dlminfosoft.sphmobile.R
 import com.dlminfosoft.sphmobile.adapter.AdapterDataUsage
@@ -12,10 +11,12 @@ import com.dlminfosoft.sphmobile.model.YearlyRecord
 import com.dlminfosoft.sphmobile.utility.Constants
 import com.dlminfosoft.sphmobile.viewmodel.MainViewModel
 import kotlinx.android.synthetic.main.activity_main.*
+import org.koin.android.viewmodel.ext.android.viewModel
 
 class MainActivity : BaseActivity() {
     private lateinit var mAdapter: AdapterDataUsage
-    private lateinit var mainViewModel: MainViewModel
+    private val mainViewModel: MainViewModel by viewModel()
+
     private var yearlyRecordList = ArrayList<YearlyRecord>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,7 +28,7 @@ class MainActivity : BaseActivity() {
     /*
     *  Lambda function pass as argument in adapter to show alert dialog
     */
-    var performOnImgBtnClick = { record: YearlyRecord ->
+    private var performOnImgBtnClick = { record: YearlyRecord ->
         val value = record.treeMapWithDataUsage.getValue(record.decreaseVolumeQuarterKey)
         val message =
             "${record.year} - ${record.decreaseVolumeQuarterKey} ${getString(R.string.message_decrease_volume)} $value"
@@ -38,7 +39,6 @@ class MainActivity : BaseActivity() {
     *  Initializer method
     */
     override fun setup() {
-        mainViewModel = ViewModelProvider(this).get(MainViewModel::class.java)
         recycle_view_data_usage.layoutManager = LinearLayoutManager(this)
         mAdapter = AdapterDataUsage(
             this, ArrayList(), performOnImgBtnClick
