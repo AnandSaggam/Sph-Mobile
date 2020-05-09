@@ -1,9 +1,5 @@
 package com.dlminfosoft.sphmobile.utility
 
-import android.content.Context
-import android.net.ConnectivityManager
-
-
 /*
 *  This object contains all the constant field and methods
 */
@@ -17,16 +13,4 @@ object Constants {
     // Database constants
     const val DATABASE_NAME = "SphMobileDatabase"
     const val YEARLY_RECORD_TABLE_NAME = "YearlyRecords"
-
-    /*
-    * Check and return result of internet connectivity
-    */
-    fun isInternetAvailable(mContext: Context): Boolean {
-        val conManager = mContext.getSystemService(Context.CONNECTIVITY_SERVICE)
-                as ConnectivityManager
-
-        val networkInfo = conManager.activeNetworkInfo
-        return networkInfo != null && networkInfo.isConnected
-    }
-
 }

@@ -10,7 +10,8 @@ import java.util.TreeMap
 */
 data class YearlyRecordResult(
     val isSuccess: Boolean,
-    val recordList: List<YearlyRecord>
+    val recordList: List<YearlyRecord>,
+    val isInternetAvailable: Boolean
 )
 
 /*

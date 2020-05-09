@@ -5,6 +5,7 @@ import com.dlminfosoft.sphmobile.BuildConfig
 import com.dlminfosoft.sphmobile.database.SphMobileDatabase
 import com.dlminfosoft.sphmobile.repository.Repository
 import com.dlminfosoft.sphmobile.utility.Constants
+import com.dlminfosoft.sphmobile.utility.NetManager
 import com.dlminfosoft.sphmobile.viewmodel.MainViewModel
 import com.dlminfosoft.sphmobile.webservice.IApiServiceMethods
 import org.koin.android.viewmodel.ext.koin.viewModel
@@ -27,7 +28,8 @@ val dataModule = module {
         Room.databaseBuilder(get(), SphMobileDatabase::class.java, Constants.DATABASE_NAME)
             .build()
     }
+    single { NetManager(get()) }
     single { get<SphMobileDatabase>().getYearlyRecordDao() }
-    single { Repository(get(), get()) }
+    single { Repository(get(), get(),get()) }
     viewModel { MainViewModel(get()) }
 }

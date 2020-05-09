@@ -8,7 +8,6 @@ import com.dlminfosoft.sphmobile.R
 import com.dlminfosoft.sphmobile.adapter.AdapterDataUsage
 import com.dlminfosoft.sphmobile.databinding.ActivityMainBinding
 import com.dlminfosoft.sphmobile.model.YearlyRecord
-import com.dlminfosoft.sphmobile.utility.Constants
 import com.dlminfosoft.sphmobile.viewmodel.MainViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.android.viewmodel.ext.android.viewModel
@@ -50,6 +49,7 @@ class MainActivity : BaseActivity() {
         *  Swipe to refresh listener
         */
         swipe_to_refresh_list.setOnRefreshListener {
+            clearList()
             loadData(true)
         }
 
@@ -68,34 +68,25 @@ class MainActivity : BaseActivity() {
     *  Call viewModel method to get data and Observer the response
     */
     private fun loadData(isFromSwipeToRefresh: Boolean) {
-        if (Constants.isInternetAvailable(this) || !isFromSwipeToRefresh) {
-            if (!isFromSwipeToRefresh) {
-                activityMainBinding.showLoading = true
-            } else clearList()
+        activityMainBinding.showLoading = !isFromSwipeToRefresh
+        mainViewModel.getListOfData()
 
-            mainViewModel.getListOfData(Constants.isInternetAvailable(this))
-
-            mainViewModel.yearlyRecordListObservable().observe(this, Observer { response ->
-                if (response != null && response.isSuccess) {
-                    if (response.recordList.isNotEmpty()) {
-                        yearlyRecordList = response.recordList.toMutableList()
-                        mAdapter.setDataList(yearlyRecordList)
-                        if (!Constants.isInternetAvailable(this))
-                            showSnackBar(getString(R.string.message_data_from_local_db))
-                    } else {
-                        if (!isFromSwipeToRefresh) showSnackBar(getString(R.string.no_internet))
-                        else showSnackBar(getString(R.string.no_record_available))
-                    }
+        mainViewModel.yearlyRecordListObservable().observe(this, Observer { response ->
+            if (response != null && response.isSuccess) {
+                if (response.recordList.isNotEmpty()) {
+                    yearlyRecordList = response.recordList.toMutableList()
+                    mAdapter.setDataList(yearlyRecordList)
+                } else if (response.recordList.isEmpty() && !response.isInternetAvailable) {
+                    showSnackBar(getString(R.string.no_internet))
                 } else {
-                    showSnackBar(getString(R.string.something_went_wrong))
+                    showSnackBar(getString(R.string.no_record_available))
                 }
-                swipe_to_refresh_list.isRefreshing = false
-                activityMainBinding.showLoading = false
-            })
-        } else {
+            } else {
+                showSnackBar(getString(R.string.something_went_wrong))
+            }
             swipe_to_refresh_list.isRefreshing = false
-            showSnackBar(getString(R.string.no_internet))
-        }
+            activityMainBinding.showLoading = false
+        })
     }
 
     /*

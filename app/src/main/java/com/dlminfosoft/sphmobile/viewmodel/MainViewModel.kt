@@ -13,8 +13,8 @@ class MainViewModel(private val repoInstance: Repository) :
     /*
     *  Invoke to repository method callDataUsageApi() for api call
     */
-    override fun getListOfData(internetAvailable: Boolean) {
-        dataUsageResponseYearlyRecord = repoInstance.makeCallToGetYearlyRecords(internetAvailable)
+    override fun getListOfData() {
+        dataUsageResponseYearlyRecord = repoInstance.makeCallToGetYearlyRecords()
     }
 
     /*

@@ -5,6 +5,7 @@ import com.dlminfosoft.sphmobile.database.YearlyRecordDao
 import com.dlminfosoft.sphmobile.model.UsageDataResponse
 import com.dlminfosoft.sphmobile.model.YearlyRecord
 import com.dlminfosoft.sphmobile.model.YearlyRecordResult
+import com.dlminfosoft.sphmobile.utility.NetManager
 import com.dlminfosoft.sphmobile.webservice.IApiServiceMethods
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -23,7 +24,8 @@ import kotlin.coroutines.CoroutineContext
 */
 class Repository(
     private val yearlyRecordDao: YearlyRecordDao,
-    private val apiServiceInstance: IApiServiceMethods
+    private val apiServiceInstance: IApiServiceMethods,
+    private val netManager: NetManager
 ) : CoroutineScope, IRepository {
     private val logger = Logger.getLogger("com.dlminfosoft.sphmobile")
 
@@ -59,10 +61,9 @@ class Repository(
     /*
     * If network available fetch data from server else fetch from local database
     */
-    override fun makeCallToGetYearlyRecords(internetAvailable: Boolean): MutableLiveData<YearlyRecordResult> {
+    override fun makeCallToGetYearlyRecords(): MutableLiveData<YearlyRecordResult> {
         val responseLiveData = MutableLiveData<YearlyRecordResult>()
-
-        if (internetAvailable) {
+        if (netManager.isConnectedToInternet) {
             apiServiceInstance.getDataUsageDetails()
                 .enqueue(object : Callback<UsageDataResponse> {
                     override fun onResponse(
@@ -78,7 +79,6 @@ class Repository(
                                 insertIntoTable(recordResult.recordList)
                             }
                         }
-                        logger.info("Record from server ==>${recordResult.recordList.size}")
                     }
 
                     override fun onFailure(call: Call<UsageDataResponse>, t: Throwable) {
@@ -91,9 +91,7 @@ class Repository(
                 val result = getAllRecordsFromTable()
                 withContext(Dispatchers.Main) {
                     responseLiveData.value =
-                        YearlyRecordResult(true, result)
-                    logger.info("Record from db ==>${result.size}")
-
+                        YearlyRecordResult(true, result, false)
                 }
             }
         }
@@ -104,6 +102,7 @@ class Repository(
     * Computing yearly records and return list of records
     */
     private fun getYearlyRecordResult(response: UsageDataResponse?): YearlyRecordResult {
+
         val yearlyRecordList = ArrayList<YearlyRecord>()
         response?.let {
             if (it.success && it.result.records.isNotEmpty()) {
@@ -155,11 +154,14 @@ class Repository(
                         mapWithDataUsage.minBy { it.value }?.key.toString()
                     )
                 yearlyRecordList.add(yearlyRecord)
+            } else {
+                return YearlyRecordResult(it.success, yearlyRecordList, true)
             }
         } ?: run {
-            return YearlyRecordResult(false, yearlyRecordList)
+            return YearlyRecordResult(false, yearlyRecordList, true)
         }
-        return YearlyRecordResult(true, yearlyRecordList)
+
+        return YearlyRecordResult(response.success, yearlyRecordList, true)
     }
 
     /*

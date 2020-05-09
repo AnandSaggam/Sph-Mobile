@@ -5,6 +5,6 @@ import com.dlminfosoft.sphmobile.model.YearlyRecordResult
 
 interface IMainViewModel {
 
-    fun getListOfData(internetAvailable: Boolean)
+    fun getListOfData()
     fun yearlyRecordListObservable(): MutableLiveData<YearlyRecordResult>
 }
