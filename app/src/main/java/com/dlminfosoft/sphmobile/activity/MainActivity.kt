@@ -1,23 +1,24 @@
 package com.dlminfosoft.sphmobile.activity
 
 import android.os.Bundle
-import android.view.View
 import androidx.core.content.ContextCompat
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.dlminfosoft.sphmobile.R
 import com.dlminfosoft.sphmobile.adapter.AdapterDataUsage
+import com.dlminfosoft.sphmobile.databinding.ActivityMainBinding
 import com.dlminfosoft.sphmobile.model.YearlyRecord
 import com.dlminfosoft.sphmobile.utility.Constants
 import com.dlminfosoft.sphmobile.viewmodel.MainViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
+
 class MainActivity : BaseActivity() {
     private lateinit var mAdapter: AdapterDataUsage
     private val mainViewModel: MainViewModel by viewModel()
-
-    private var yearlyRecordList = ArrayList<YearlyRecord>()
+    private lateinit var activityMainBinding: ActivityMainBinding
+    private var yearlyRecordList = mutableListOf<YearlyRecord>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,12 +40,10 @@ class MainActivity : BaseActivity() {
     *  Initializer method
     */
     override fun setup() {
-        recycle_view_data_usage.layoutManager = LinearLayoutManager(this)
-        mAdapter = AdapterDataUsage(
-            this, ArrayList(), performOnImgBtnClick
-        )
-
-        recycle_view_data_usage.adapter = mAdapter
+        activityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        mAdapter = AdapterDataUsage(this, yearlyRecordList, performOnImgBtnClick)
+        activityMainBinding.showLoading = false
+        activityMainBinding.myAdapter = mAdapter
         loadData(false)
 
         /*
@@ -70,15 +69,16 @@ class MainActivity : BaseActivity() {
     */
     private fun loadData(isFromSwipeToRefresh: Boolean) {
         if (Constants.isInternetAvailable(this) || !isFromSwipeToRefresh) {
-            if (!isFromSwipeToRefresh) showLoading()
-            else clearList()
+            if (!isFromSwipeToRefresh) {
+                activityMainBinding.showLoading = true
+            } else clearList()
 
             mainViewModel.getListOfData(Constants.isInternetAvailable(this))
 
             mainViewModel.yearlyRecordListObservable().observe(this, Observer { response ->
                 if (response != null && response.isSuccess) {
                     if (response.recordList.isNotEmpty()) {
-                        yearlyRecordList = response.recordList
+                        yearlyRecordList = response.recordList.toMutableList()
                         mAdapter.setDataList(yearlyRecordList)
                         if (!Constants.isInternetAvailable(this))
                             showSnackBar(getString(R.string.message_data_from_local_db))
@@ -90,7 +90,7 @@ class MainActivity : BaseActivity() {
                     showSnackBar(getString(R.string.something_went_wrong))
                 }
                 swipe_to_refresh_list.isRefreshing = false
-                hideLoading()
+                activityMainBinding.showLoading = false
             })
         } else {
             swipe_to_refresh_list.isRefreshing = false
@@ -104,19 +104,5 @@ class MainActivity : BaseActivity() {
     private fun clearList() {
         yearlyRecordList.clear()
         mAdapter.setDataList(yearlyRecordList)
-    }
-
-    /*
-    * Hiding progress bar
-    */
-    private fun hideLoading() {
-        progressBar.visibility = View.GONE
-    }
-
-    /*
-    * Showing progress bar
-    */
-    private fun showLoading() {
-        progressBar.visibility = View.VISIBLE
     }
 }

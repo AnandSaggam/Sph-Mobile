@@ -12,10 +12,10 @@ interface YearlyRecordDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     @JvmSuppressWildcards
-    fun insertAll(list: List<YearlyRecord>)
+    fun insertAll(list: List<YearlyRecord>):Array<Long>
 
     @Query("DELETE FROM ${Constants.YEARLY_RECORD_TABLE_NAME}")
-    suspend fun deleteAllRecords()
+    suspend fun deleteAllRecords():Int
 
     @Query("SELECT * FROM ${Constants.YEARLY_RECORD_TABLE_NAME}")
     suspend fun getAllRecordsList(): List<YearlyRecord>

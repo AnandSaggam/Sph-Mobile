@@ -4,14 +4,13 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.dlminfosoft.sphmobile.utility.Constants
 import java.util.TreeMap
-import kotlin.collections.ArrayList
 
 /*
 * This class hold list of each year data and api result
 */
 data class YearlyRecordResult(
     val isSuccess: Boolean,
-    val recordList: ArrayList<YearlyRecord>
+    val recordList: List<YearlyRecord>
 )
 
 /*

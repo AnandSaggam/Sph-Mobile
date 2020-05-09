@@ -1,6 +1,5 @@
 package com.dlminfosoft.sphmobile.repository
 
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.dlminfosoft.sphmobile.database.YearlyRecordDao
 import com.dlminfosoft.sphmobile.model.UsageDataResponse
@@ -15,6 +14,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.util.TreeMap
+import java.util.logging.Logger
 import kotlin.collections.ArrayList
 import kotlin.coroutines.CoroutineContext
 
@@ -24,16 +24,18 @@ import kotlin.coroutines.CoroutineContext
 class Repository(
     private val yearlyRecordDao: YearlyRecordDao,
     private val apiServiceInstance: IApiServiceMethods
-) : CoroutineScope {
+) : CoroutineScope, IRepository {
+    private val logger = Logger.getLogger("com.dlminfosoft.sphmobile")
 
     /*
     * Insert list of records in YearlyRecords table
     */
-    private suspend fun insertIntoTable(yearlyRecord: ArrayList<YearlyRecord>) {
+    private suspend fun insertIntoTable(yearlyRecord: List<YearlyRecord>) {
         // Do insertion in background thread using coroutine
         withContext(Dispatchers.IO) {
             deleteAllRecord()
-            yearlyRecordDao.insertAll(yearlyRecord)
+            val result = yearlyRecordDao.insertAll(yearlyRecord)
+            logger.info("Number of record inserted result: ${result.size}")
         }
     }
 
@@ -42,7 +44,8 @@ class Repository(
     */
     private suspend fun deleteAllRecord() {
         withContext(Dispatchers.IO) {
-            yearlyRecordDao.deleteAllRecords()
+            val result = yearlyRecordDao.deleteAllRecords()
+            logger.info("Number of record deleted result: $result")
         }
     }
 
@@ -56,7 +59,7 @@ class Repository(
     /*
     * If network available fetch data from server else fetch from local database
     */
-    fun makeCallToGetYearlyRecords(internetAvailable: Boolean): MutableLiveData<YearlyRecordResult> {
+    override fun makeCallToGetYearlyRecords(internetAvailable: Boolean): MutableLiveData<YearlyRecordResult> {
         val responseLiveData = MutableLiveData<YearlyRecordResult>()
 
         if (internetAvailable) {
@@ -75,7 +78,7 @@ class Repository(
                                 insertIntoTable(recordResult.recordList)
                             }
                         }
-                        Log.e("Record from server", "==>${recordResult.recordList.size}")
+                        logger.info("Record from server ==>${recordResult.recordList.size}")
                     }
 
                     override fun onFailure(call: Call<UsageDataResponse>, t: Throwable) {
@@ -88,8 +91,9 @@ class Repository(
                 val result = getAllRecordsFromTable()
                 withContext(Dispatchers.Main) {
                     responseLiveData.value =
-                        YearlyRecordResult(true, result as ArrayList<YearlyRecord>)
-                    Log.e("Record from db", "==>${result.size}")
+                        YearlyRecordResult(true, result)
+                    logger.info("Record from db ==>${result.size}")
+
                 }
             }
         }
@@ -101,60 +105,59 @@ class Repository(
     */
     private fun getYearlyRecordResult(response: UsageDataResponse?): YearlyRecordResult {
         val yearlyRecordList = ArrayList<YearlyRecord>()
-        try {
-            response?.let {
-                if (response.success && response.result.records.isNotEmpty()) {
-                    var currentYear = "0000"
-                    var mapWithDataUsage = TreeMap<String, Double>()
-                    var totalVolume = 0.0
+        response?.let {
+            if (it.success && it.result.records.isNotEmpty()) {
+                var currentYear = "0000"
+                var mapWithDataUsage = TreeMap<String, Double>()
+                var totalVolume = 0.0
 
-                    for (item in response.result.records) {
-                        val yearWithQuarter = item.quarter.split("-")
-                        if (currentYear == "0000") {
-                            // First record of list
-                            mapWithDataUsage = TreeMap()
-                            currentYear = yearWithQuarter[0]
+                for (item in it.result.records) {
+                    val yearWithQuarter = item.quarter.split("-")
+                    if (currentYear == "0000") {
+                        // First record of list
+                        mapWithDataUsage = TreeMap()
+                        currentYear = yearWithQuarter[0]
+                        mapWithDataUsage[yearWithQuarter[1]] = item.volume_of_mobile_data
+                        totalVolume += item.volume_of_mobile_data
+                    } else {
+                        // Record with same year
+                        if (yearWithQuarter[0] == (currentYear)) {
                             mapWithDataUsage[yearWithQuarter[1]] = item.volume_of_mobile_data
                             totalVolume += item.volume_of_mobile_data
                         } else {
-                            // Record with same year
-                            if (yearWithQuarter[0] == (currentYear)) {
-                                mapWithDataUsage[yearWithQuarter[1]] = item.volume_of_mobile_data
-                                totalVolume += item.volume_of_mobile_data
-                            } else {
-                                // Record with new year, so add old year data in list
-                                yearlyRecordList.add(
-                                    getYearlyRecord(
-                                        currentYear,
-                                        mapWithDataUsage,
-                                        totalVolume,
-                                        mapWithDataUsage.minBy { it.value }?.key != mapWithDataUsage.firstKey(),
-                                        mapWithDataUsage.minBy { it.value }?.key.toString()
-                                    )
+                            // Record with new year, so add old year data in list
+                            yearlyRecordList.add(
+                                getYearlyRecord(
+                                    currentYear,
+                                    mapWithDataUsage,
+                                    totalVolume,
+                                    mapWithDataUsage.minBy { it.value }?.key != mapWithDataUsage.firstKey(),
+                                    mapWithDataUsage.minBy { it.value }?.key.toString()
                                 )
-                                // Resetting data
-                                mapWithDataUsage = TreeMap()
-                                totalVolume = 0.0
-                                totalVolume += item.volume_of_mobile_data
-                                currentYear = yearWithQuarter[0]
-                                mapWithDataUsage[yearWithQuarter[1]] = item.volume_of_mobile_data
-                            }
+                            )
+                            // Resetting data
+                            mapWithDataUsage = TreeMap()
+                            totalVolume = 0.0
+                            totalVolume += item.volume_of_mobile_data
+                            currentYear = yearWithQuarter[0]
+                            mapWithDataUsage[yearWithQuarter[1]] = item.volume_of_mobile_data
                         }
                     }
-
-                    // Add last record in list
-                    val yearlyRecord =
-                        getYearlyRecord(
-                            currentYear,
-                            mapWithDataUsage,
-                            totalVolume,
-                            mapWithDataUsage.minBy { it.value }?.key != mapWithDataUsage.firstKey(),
-                            mapWithDataUsage.minBy { it.value }?.key.toString()
-                        )
-                    yearlyRecordList.add(yearlyRecord)
                 }
+
+                // Add last record in list
+                val yearlyRecord =
+                    getYearlyRecord(
+                        currentYear,
+                        mapWithDataUsage,
+                        totalVolume,
+                        mapWithDataUsage.minBy { it.value }?.key != mapWithDataUsage.firstKey(),
+                        mapWithDataUsage.minBy { it.value }?.key.toString()
+                    )
+                yearlyRecordList.add(yearlyRecord)
             }
-        } catch (e: Exception) {
+        } ?: run {
+            return YearlyRecordResult(false, yearlyRecordList)
         }
         return YearlyRecordResult(true, yearlyRecordList)
     }
@@ -176,14 +179,6 @@ class Repository(
             isDecreaseVolumeData,
             decreaseVolumeQuarterKey
         )
-
-//    operator fun invoke(): Repository {
-//
-//    }
-
-//    operator fun invoke(): Repository {
-//
-//    }
 
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main

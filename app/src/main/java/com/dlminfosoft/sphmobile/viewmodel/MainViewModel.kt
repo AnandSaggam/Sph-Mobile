@@ -6,21 +6,21 @@ import com.dlminfosoft.sphmobile.model.YearlyRecordResult
 import com.dlminfosoft.sphmobile.repository.Repository
 
 class MainViewModel(private val repoInstance: Repository) :
-    ViewModel() {
+    ViewModel(), IMainViewModel {
 
     private var dataUsageResponseYearlyRecord = MutableLiveData<YearlyRecordResult>()
 
     /*
     *  Invoke to repository method callDataUsageApi() for api call
     */
-    fun getListOfData(internetAvailable: Boolean) {
+    override fun getListOfData(internetAvailable: Boolean) {
         dataUsageResponseYearlyRecord = repoInstance.makeCallToGetYearlyRecords(internetAvailable)
     }
 
     /*
     *  This method return observable liveData of YearlyRecordList
     */
-    fun yearlyRecordListObservable(): MutableLiveData<YearlyRecordResult> {
+    override fun yearlyRecordListObservable(): MutableLiveData<YearlyRecordResult> {
         return dataUsageResponseYearlyRecord
     }
 }

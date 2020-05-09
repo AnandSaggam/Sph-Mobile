@@ -1,5 +1,7 @@
 package com.dlminfosoft.sphmobile.model
 
+import com.google.gson.annotations.SerializedName
+
 /*
 * This class hold response of getUserDetails api
 */
@@ -9,4 +11,7 @@ data class ResultData(
     val records: ArrayList<RecordsData>, val total: Int, val offset: Int = 0, val limit: Int = 0
 )
 
-data class RecordsData(val _id: Int, val quarter: String, val volume_of_mobile_data: Double)
+data class RecordsData(
+    @SerializedName("_id") val id: Int, val quarter: String,
+    val volume_of_mobile_data: Double
+)

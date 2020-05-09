@@ -15,14 +15,20 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField "String", "BASE_URL", '"https://data.gov.sg/api/action/"'
     }
 
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "BASE_URL", '"https://data.gov.sg/api/action/"'
+        }
+        debug {
+            buildConfigField "String", "BASE_URL", '"https://data.gov.sg/api/action/"'
         }
     }
+
     dataBinding {
         enabled = true
     }
@@ -69,9 +75,10 @@ dependencies {
     implementation "androidx.room:room-runtime:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
+
+    // Koin dependency injection
     implementation "org.koin:koin-android:$koin_version"
     implementation "org.koin:koin-android-viewmodel:$koin_version"
     implementation "org.koin:koin-android-architecture:$koin_arch_version"
-    androidTestImplementation "org.koin:koin-test:$koin_version"
-
+    testImplementation "org.koin:koin-core:$koin_version"
 }
