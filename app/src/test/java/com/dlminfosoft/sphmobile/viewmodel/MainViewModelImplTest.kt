@@ -13,7 +13,11 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito
-import kotlin.collections.ArrayList
+
+/**
+ * This class contains unit test MainViewModelImpl class
+ * covered test cases for different livedata value
+ */
 
 @RunWith(AndroidJUnit4::class)
 class MainViewModelImplTest {

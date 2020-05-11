@@ -7,6 +7,11 @@ import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 
+/**
+ * This class contains unit test cases for
+ * computing quarterly record and return yearlyRecord list
+ */
+
 @RunWith(AndroidJUnit4::class)
 class UseCaseRepositoryImplTest {
 

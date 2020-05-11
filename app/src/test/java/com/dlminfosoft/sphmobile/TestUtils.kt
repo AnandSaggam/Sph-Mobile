@@ -1,9 +1,15 @@
 package com.dlminfosoft.sphmobile
 
 import com.dlminfosoft.sphmobile.model.*
+import com.dlminfosoft.sphmobile.repository.MockInterceptor
+import okhttp3.OkHttpClient
 import java.util.*
 import kotlin.collections.ArrayList
 
+/**
+ * This class contains dummy data
+ * which used as request and response for other test cases
+ */
 object TestUtils {
 
     private fun getDummyYearlyRecord(year: String): YearlyRecord {
@@ -59,4 +65,21 @@ object TestUtils {
         val recordsData = ResultData(recordDataList, 4)
         return UsageDataResponse(true, recordsData)
     }
+
+    fun provideOkHttpClient(
+    ): OkHttpClient {
+        return OkHttpClient
+            .Builder()
+            .addInterceptor(MockInterceptor())
+            .build()
+    }
+
+    const val getSuccessResponseBody =
+        """{"help": "https://data.gov.sg/api/3/action/help_show?name=datastore_search", "success": true, "result": {"resource_id": "a807b7ab-6cad-4aa6-87d0-e283a7353a0f", "fields": [{"type": "int4", "id": "_id"}, {"type": "text", "id": "quarter"}, {"type": "numeric", "id": "volume_of_mobile_data"}], "records": [{"volume_of_mobile_data": "0.000384", "quarter": "2004-Q3", "_id": 1}, {"volume_of_mobile_data": "0.000543", "quarter": "2004-Q4", "_id": 2}, {"volume_of_mobile_data": "0.00062", "quarter": "2005-Q1", "_id": 3}, {"volume_of_mobile_data": "0.000634", "quarter": "2005-Q2", "_id": 4}, {"volume_of_mobile_data": "0.000718", "quarter": "2005-Q3", "_id": 5}], "_links": {"start": "/api/action/datastore_search?limit=5&resource_id=a807b7ab-6cad-4aa6-87d0-e283a7353a0f", "next": "/api/action/datastore_search?offset=5&limit=5&resource_id=a807b7ab-6cad-4aa6-87d0-e283a7353a0f"}, "limit": 5, "total": 59}}"""
+
+    const val getSuccessResponseBodyWithoutRecord =
+        """{ "success": true, "result": {"records": []}}"""
+    const val SUCCESS_RESULT = "Success_result"
+    const val SUCCESS_RESULT_WITHOUT_RECORD = "Success_result_without_record"
+    const val FAILURE_RESULT = "Failure_result"
 }
