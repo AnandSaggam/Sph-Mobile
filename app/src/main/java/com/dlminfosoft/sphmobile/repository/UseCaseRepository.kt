@@ -3,7 +3,7 @@ package com.dlminfosoft.sphmobile.repository
 import com.dlminfosoft.sphmobile.model.UsageDataResponse
 import com.dlminfosoft.sphmobile.model.YearlyRecord
 import com.dlminfosoft.sphmobile.model.YearlyRecordResult
-import java.util.TreeMap
+import java.util.*
 import kotlin.collections.ArrayList
 
 object UseCaseRepository {
@@ -35,13 +35,15 @@ object UseCaseRepository {
                             totalVolume += item.volume_of_mobile_data
                         } else {
                             // Record with new year, so add old year data in list
+                            val decreaseVolumeKey: String =
+                                returnDecreaseKeyEntry(mapWithDataUsage)
                             yearlyRecordList.add(
                                 getYearlyRecord(
                                     currentYear,
                                     mapWithDataUsage,
                                     totalVolume,
-                                    mapWithDataUsage.minBy { it.value }?.key != mapWithDataUsage.firstKey(),
-                                    mapWithDataUsage.minBy { it.value }?.key.toString()
+                                    decreaseVolumeKey != mapWithDataUsage.firstKey(),
+                                    decreaseVolumeKey
                                 )
                             )
                             // Resetting data
@@ -55,13 +57,15 @@ object UseCaseRepository {
                 }
 
                 // Add last record in list
+                val decreaseVolumeKey: String =
+                    returnDecreaseKeyEntry(mapWithDataUsage)
                 val yearlyRecord =
                     getYearlyRecord(
                         currentYear,
                         mapWithDataUsage,
                         totalVolume,
-                        mapWithDataUsage.minBy { it.value }?.key != mapWithDataUsage.firstKey(),
-                        mapWithDataUsage.minBy { it.value }?.key.toString()
+                        decreaseVolumeKey != mapWithDataUsage.firstKey(),
+                        decreaseVolumeKey
                     )
                 yearlyRecordList.add(yearlyRecord)
             } else {
@@ -71,7 +75,33 @@ object UseCaseRepository {
             return YearlyRecordResult(false, yearlyRecordList, true)
         }
 
-        return YearlyRecordResult(response.success, yearlyRecordList, true)
+        /**
+         * Here we are filtering records based on specific year rang
+         * comment out below code block to get record for each year
+         */
+        val specificYearlyRecordList = ArrayList<YearlyRecord>()
+        for (item in yearlyRecordList) {
+            if (item.year.toInt() in 2008..2018) {
+                specificYearlyRecordList.add(item)
+            }
+        }
+        return YearlyRecordResult(response.success, specificYearlyRecordList, true)
+    }
+
+    /**
+     * This method return quarter if decrease in volume
+     */
+    private fun returnDecreaseKeyEntry(mapWithDataUsage: TreeMap<String, Double>): String {
+        var previousItemKey = mapWithDataUsage.firstKey()
+        val foundDecreaseKey = mapWithDataUsage.firstKey()
+        for ((key, currentValue) in mapWithDataUsage.entries) {
+
+            if (currentValue < mapWithDataUsage[previousItemKey] ?: 0.0) {
+                return key
+            }
+            previousItemKey = key
+        }
+        return foundDecreaseKey
     }
 
     /**
