@@ -3,12 +3,16 @@ package com.dlminfosoft.sphmobile.viewmodel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.dlminfosoft.sphmobile.model.YearlyRecordResult
-import com.dlminfosoft.sphmobile.repository.Repository
+import com.dlminfosoft.sphmobile.repository.RepositoryImpl
 
-class MainViewModel(private val repoInstance: Repository) :
+class MainViewModelImpl(private val repoInstance: RepositoryImpl) :
     ViewModel(), IMainViewModel {
 
     private var dataUsageResponseYearlyRecord = MutableLiveData<YearlyRecordResult>()
+
+    init {
+        getListOfData()
+    }
 
     /*
     *  Invoke to repository method callDataUsageApi() for api call

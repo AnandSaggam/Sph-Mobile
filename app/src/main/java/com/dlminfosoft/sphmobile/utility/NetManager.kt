@@ -3,8 +3,7 @@ package com.dlminfosoft.sphmobile.utility
 import android.content.Context
 import android.net.ConnectivityManager
 
-class NetManager(var applicationContext: Context) {
-
+class NetManager(private var applicationContext: Context) {
 
     /*
     * Check and return result of internet connectivity

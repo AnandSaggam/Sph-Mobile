@@ -3,10 +3,10 @@ package com.dlminfosoft.sphmobile.di
 import androidx.room.Room
 import com.dlminfosoft.sphmobile.BuildConfig
 import com.dlminfosoft.sphmobile.database.SphMobileDatabase
-import com.dlminfosoft.sphmobile.repository.Repository
+import com.dlminfosoft.sphmobile.repository.RepositoryImpl
 import com.dlminfosoft.sphmobile.utility.Constants
 import com.dlminfosoft.sphmobile.utility.NetManager
-import com.dlminfosoft.sphmobile.viewmodel.MainViewModel
+import com.dlminfosoft.sphmobile.viewmodel.MainViewModelImpl
 import com.dlminfosoft.sphmobile.webservice.IApiServiceMethods
 import org.koin.android.viewmodel.ext.koin.viewModel
 import org.koin.dsl.module.module
@@ -30,6 +30,6 @@ val dataModule = module {
     }
     single { NetManager(get()) }
     single { get<SphMobileDatabase>().getYearlyRecordDao() }
-    single { Repository(get(), get(),get()) }
-    viewModel { MainViewModel(get()) }
+    single { RepositoryImpl(get(), get(),get()) }
+    viewModel { MainViewModelImpl(get()) }
 }

@@ -8,14 +8,14 @@ import com.dlminfosoft.sphmobile.R
 import com.dlminfosoft.sphmobile.adapter.AdapterDataUsage
 import com.dlminfosoft.sphmobile.databinding.ActivityMainBinding
 import com.dlminfosoft.sphmobile.model.YearlyRecord
-import com.dlminfosoft.sphmobile.viewmodel.MainViewModel
+import com.dlminfosoft.sphmobile.viewmodel.MainViewModelImpl
 import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
 
 class MainActivity : BaseActivity() {
     private lateinit var mAdapter: AdapterDataUsage
-    private val mainViewModel: MainViewModel by viewModel()
+    private val mainViewModelImpl: MainViewModelImpl by viewModel()
     private lateinit var activityMainBinding: ActivityMainBinding
     private var yearlyRecordList = mutableListOf<YearlyRecord>()
 
@@ -69,9 +69,9 @@ class MainActivity : BaseActivity() {
     */
     private fun loadData(isFromSwipeToRefresh: Boolean) {
         activityMainBinding.showLoading = !isFromSwipeToRefresh
-        mainViewModel.getListOfData()
+        if (isFromSwipeToRefresh) mainViewModelImpl.getListOfData()
 
-        mainViewModel.yearlyRecordListObservable().observe(this, Observer { response ->
+        mainViewModelImpl.yearlyRecordListObservable().observe(this, Observer { response ->
             if (response != null && response.isSuccess) {
                 if (response.recordList.isNotEmpty()) {
                     yearlyRecordList = response.recordList.toMutableList()
