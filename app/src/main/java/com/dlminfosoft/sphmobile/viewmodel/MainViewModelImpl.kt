@@ -5,6 +5,9 @@ import androidx.lifecycle.ViewModel
 import com.dlminfosoft.sphmobile.model.YearlyRecordResult
 import com.dlminfosoft.sphmobile.repository.RepositoryImpl
 
+/**
+ * This class interact with RepositoryImpl and hold observable data
+ */
 class MainViewModelImpl(private val repoInstance: RepositoryImpl) :
     ViewModel(), IMainViewModel {
 
@@ -14,16 +17,16 @@ class MainViewModelImpl(private val repoInstance: RepositoryImpl) :
         getListOfData()
     }
 
-    /*
-    *  Invoke to repository method callDataUsageApi() for api call
-    */
+    /**
+     *  Invoke to repository method callDataUsageApi() for api call
+     */
     override fun getListOfData() {
         dataUsageResponseYearlyRecord = repoInstance.makeCallToGetYearlyRecords()
     }
 
-    /*
-    *  This method return observable liveData of YearlyRecordList
-    */
+    /**
+     *  This method return observable liveData of YearlyRecordList
+     */
     override fun yearlyRecordListObservable(): MutableLiveData<YearlyRecordResult> {
         return dataUsageResponseYearlyRecord
     }

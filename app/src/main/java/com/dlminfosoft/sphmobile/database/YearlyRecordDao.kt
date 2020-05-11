@@ -7,15 +7,18 @@ import androidx.room.Query
 import com.dlminfosoft.sphmobile.model.YearlyRecord
 import com.dlminfosoft.sphmobile.utility.Constants
 
+/**
+ * This interface contains all the CRUD method for database
+ */
 @Dao
 interface YearlyRecordDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     @JvmSuppressWildcards
-    suspend fun insertAll(list: List<YearlyRecord>):Array<Long>
+    suspend fun insertAll(list: List<YearlyRecord>): Array<Long>
 
     @Query("DELETE FROM ${Constants.YEARLY_RECORD_TABLE_NAME}")
-    suspend fun deleteAllRecords():Int
+    suspend fun deleteAllRecords(): Int
 
     @Query("SELECT * FROM ${Constants.YEARLY_RECORD_TABLE_NAME}")
     suspend fun getAllRecordsList(): List<YearlyRecord>

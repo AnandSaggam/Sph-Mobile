@@ -8,9 +8,9 @@ import kotlin.collections.ArrayList
 
 object UseCaseRepository {
 
-    /*
-   * Computing yearly records and return list of records
-   */
+    /**
+     * Computing yearly records and return list of records
+     */
     fun getYearlyRecordResult(response: UsageDataResponse?): YearlyRecordResult {
 
         val yearlyRecordList = ArrayList<YearlyRecord>()
@@ -74,9 +74,9 @@ object UseCaseRepository {
         return YearlyRecordResult(response.success, yearlyRecordList, true)
     }
 
-    /*
-    * Create and return instance of YearlyRecord
-    */
+    /**
+     * Create and return instance of YearlyRecord
+     */
     private fun getYearlyRecord(
         currentYear: String,
         mapWithDataUsage: TreeMap<String, Double>,

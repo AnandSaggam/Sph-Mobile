@@ -15,9 +15,9 @@ import retrofit2.Response
 import java.util.logging.Logger
 import kotlin.coroutines.CoroutineContext
 
-/*
-* This class handle all the network operation and database CRUD operations
-*/
+/**
+ * This class handle all the network operation and database CRUD operations
+ */
 class RepositoryImpl(
     private val yearlyRecordDao: YearlyRecordDao,
     private val apiServiceInstance: IApiServiceMethods,
@@ -25,9 +25,9 @@ class RepositoryImpl(
 ) : CoroutineScope, IRepository {
     private val logger = Logger.getLogger("com.dlminfosoft.sphmobile")
 
-    /*
-    * Insert list of records in YearlyRecords table
-    */
+    /**
+     * Insert list of records in YearlyRecords table
+     */
     override fun insertIntoTable(yearlyRecordDataList: List<YearlyRecord>) {
         // Do insertion in background thread using coroutine
         if (yearlyRecordDataList.isNotEmpty()) {
@@ -40,9 +40,9 @@ class RepositoryImpl(
         }
     }
 
-    /*
-    * Delete all records from YearlyRecords table
-    */
+    /**
+     * Delete all records from YearlyRecords table
+     */
     override fun deleteAllRecord() {
         runBlocking {
             val result = yearlyRecordDao.deleteAllRecords()
@@ -50,9 +50,9 @@ class RepositoryImpl(
         }
     }
 
-    /*
-    * Retrieving list of records YearlyRecords table
-    */
+    /**
+     * Retrieving list of records YearlyRecords table
+     */
     override fun getAllRecordsFromTable(): List<YearlyRecord> {
         var resultFinal: List<YearlyRecord> = ArrayList()
         runBlocking {
@@ -63,9 +63,9 @@ class RepositoryImpl(
         return resultFinal
     }
 
-    /*
-    * If network available fetch data from server else fetch from local database
-    */
+    /**
+     * If network available fetch data from server else fetch from local database
+     */
     override fun makeCallToGetYearlyRecords(): MutableLiveData<YearlyRecordResult> {
         val responseLiveData = MutableLiveData<YearlyRecordResult>()
         if (netManager.isConnectedToInternet) {

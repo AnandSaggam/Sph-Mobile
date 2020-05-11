@@ -12,7 +12,9 @@ import com.dlminfosoft.sphmobile.viewmodel.MainViewModelImpl
 import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
-
+/**
+ * This is first activity which display in  app
+ */
 class MainActivity : BaseActivity() {
     private lateinit var mAdapter: AdapterDataUsage
     private val mainViewModelImpl: MainViewModelImpl by viewModel()
@@ -25,9 +27,9 @@ class MainActivity : BaseActivity() {
         setup()
     }
 
-    /*
-    *  Lambda function pass as argument in adapter to show alert dialog
-    */
+    /**
+     *  Lambda function pass as argument in adapter to show alert dialog
+     */
     private var performOnImgBtnClick = { record: YearlyRecord ->
         val value = record.treeMapWithDataUsage.getValue(record.decreaseVolumeQuarterKey)
         val message =
@@ -35,9 +37,9 @@ class MainActivity : BaseActivity() {
         showAlertDialog(getString(R.string.alert_title), message)
     }
 
-    /*
-    *  Initializer method
-    */
+    /**
+     *  Initializer method
+     */
     override fun setup() {
         activityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         mAdapter = AdapterDataUsage(this, yearlyRecordList, performOnImgBtnClick)
@@ -45,17 +47,17 @@ class MainActivity : BaseActivity() {
         activityMainBinding.myAdapter = mAdapter
         loadData(false)
 
-        /*
-        *  Swipe to refresh listener
-        */
+        /**
+         *  Swipe to refresh listener
+         */
         swipe_to_refresh_list.setOnRefreshListener {
             clearList()
             loadData(true)
         }
 
-        /*
-        * Set different colors of loading
-        */
+        /**
+         * Set different colors of loading
+         */
         swipe_to_refresh_list.setColorSchemeColors(
             ContextCompat.getColor(this, android.R.color.holo_blue_bright),
             ContextCompat.getColor(this, android.R.color.holo_green_light),
@@ -64,9 +66,9 @@ class MainActivity : BaseActivity() {
         )
     }
 
-    /*
-    *  Call viewModel method to get data and Observer the response
-    */
+    /**
+     *  Call viewModel method to get data and Observer the response
+     */
     private fun loadData(isFromSwipeToRefresh: Boolean) {
         activityMainBinding.showLoading = !isFromSwipeToRefresh
         if (isFromSwipeToRefresh) mainViewModelImpl.getListOfData()
@@ -89,9 +91,9 @@ class MainActivity : BaseActivity() {
         })
     }
 
-    /*
-    * Clear list data when do swipe to refresh
-    */
+    /**
+     * Clear list data when do swipe to refresh
+     */
     private fun clearList() {
         yearlyRecordList.clear()
         mAdapter.setDataList(yearlyRecordList)

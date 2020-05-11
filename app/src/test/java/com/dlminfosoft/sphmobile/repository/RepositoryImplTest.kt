@@ -83,7 +83,7 @@ class RepositoryImplTest : CoroutineScope {
     @Test
     fun `verify_getDataUsageDetails()_api_method_return_success_with_200_status_code`() {
         whenever(netManager.isConnectedToInternet).thenReturn(true)
-        val actualResult = apiService.getDataUsageDetails("success").execute()
+        val actualResult = apiService.getDataUsageDetails(SUCCESS_RESULT).execute()
         Assert.assertNotNull(actualResult)
         Assert.assertEquals(true, actualResult.isSuccessful)
         Assert.assertEquals(200, actualResult.code())

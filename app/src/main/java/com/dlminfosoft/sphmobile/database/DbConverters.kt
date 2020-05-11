@@ -3,11 +3,11 @@ package com.dlminfosoft.sphmobile.database
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.lang.reflect.Type
-import java.util.TreeMap
+import java.util.*
 
-/*
-* This class used for converting Object to String and vice versa when storing and retrieving from database
-*/
+/**
+ * This class used for converting Object to String and vice versa when storing and retrieving from database
+ */
 class DbConverters {
 
     @androidx.room.TypeConverter

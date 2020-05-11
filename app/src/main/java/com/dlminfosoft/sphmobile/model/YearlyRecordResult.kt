@@ -3,20 +3,20 @@ package com.dlminfosoft.sphmobile.model
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.dlminfosoft.sphmobile.utility.Constants
-import java.util.TreeMap
+import java.util.*
 
-/*
-* This class hold list of each year data and api result
-*/
+/**
+ * This class hold list of each year data and api result
+ */
 data class YearlyRecordResult(
     val isSuccess: Boolean,
     val recordList: List<YearlyRecord>,
     val isInternetAvailable: Boolean
 )
 
-/*
-* This class hold value of each year data
-*/
+/**
+ * This class hold value of each year data
+ */
 @Entity(tableName = Constants.YEARLY_RECORD_TABLE_NAME)
 data class YearlyRecord(
     val year: String,

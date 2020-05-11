@@ -5,9 +5,9 @@ import android.net.ConnectivityManager
 
 class NetManager(private var applicationContext: Context) {
 
-    /*
-    * Check and return result of internet connectivity
-    */
+    /**
+     * Check and return result of internet connectivity
+     */
     val isConnectedToInternet: Boolean
         get() {
             val conManager = applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE)

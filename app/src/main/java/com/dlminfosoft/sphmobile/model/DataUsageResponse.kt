@@ -2,9 +2,9 @@ package com.dlminfosoft.sphmobile.model
 
 import com.google.gson.annotations.SerializedName
 
-/*
-* This class hold response of getUserDetails api
-*/
+/**
+ * This class hold response of getUserDetails api
+ */
 data class UsageDataResponse(val success: Boolean, val result: ResultData)
 
 data class ResultData(

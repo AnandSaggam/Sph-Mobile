@@ -6,7 +6,9 @@ import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-
+/**
+ * This interface contains all the API methods
+ */
 interface IApiServiceMethods {
 
     @GET(Constants.METHOD_GET_DATA_USAGE)

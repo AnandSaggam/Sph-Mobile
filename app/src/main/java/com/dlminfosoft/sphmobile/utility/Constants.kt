@@ -1,8 +1,8 @@
 package com.dlminfosoft.sphmobile.utility
 
-/*
-*  This object contains all the constant field and methods
-*/
+/**
+ *  This object contains all the constant field and methods
+ */
 object Constants {
 
     // Api constants

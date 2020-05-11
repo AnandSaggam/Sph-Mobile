@@ -13,9 +13,9 @@ import org.koin.dsl.module.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-/*
-  * Creating a list of dependent object
-  */
+/**
+ * Creating a list of dependent object
+ */
 val dataModule = module {
     single<Retrofit> {
         Retrofit.Builder()
@@ -30,6 +30,6 @@ val dataModule = module {
     }
     single { NetManager(get()) }
     single { get<SphMobileDatabase>().getYearlyRecordDao() }
-    single { RepositoryImpl(get(), get(),get()) }
+    single { RepositoryImpl(get(), get(), get()) }
     viewModel { MainViewModelImpl(get()) }
 }

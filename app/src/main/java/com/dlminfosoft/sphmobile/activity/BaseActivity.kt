@@ -7,21 +7,21 @@ import com.google.android.material.snackbar.Snackbar
 
 abstract class BaseActivity : AppCompatActivity() {
 
-    /*
-    * Initializer abstract method
-    */
+    /**
+     * Initializer abstract method
+     */
     abstract fun setup()
 
-    /*
-    * Method used for show snackBar message
-    */
+    /**
+     * Method used for show snackBar message
+     */
     protected fun showSnackBar(msg: String) {
         Snackbar.make(findViewById(android.R.id.content), msg, Snackbar.LENGTH_SHORT).show()
     }
 
-    /*
-    * Method used for display alert dialog
-    */
+    /**
+     * Method used for display alert dialog
+     */
     protected fun showAlertDialog(title: String, message: String) {
         AlertDialog.Builder(this)
             .setTitle(title)
