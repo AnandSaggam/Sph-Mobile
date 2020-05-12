@@ -8,6 +8,7 @@ import com.dlminfosoft.sphmobile.R
 import com.dlminfosoft.sphmobile.adapter.AdapterDataUsage
 import com.dlminfosoft.sphmobile.databinding.ActivityMainBinding
 import com.dlminfosoft.sphmobile.model.YearlyRecord
+import com.dlminfosoft.sphmobile.utility.EspressoIdlingResource
 import com.dlminfosoft.sphmobile.viewmodel.MainViewModelImpl
 import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.android.viewmodel.ext.android.viewModel
@@ -41,6 +42,7 @@ class MainActivity : BaseActivity() {
      *  Initializer method
      */
     override fun setup() {
+        EspressoIdlingResource.increment() // This used for only Espresso UI test cases
         activityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         mAdapter = AdapterDataUsage(this, yearlyRecordList, performOnImgBtnClick)
         activityMainBinding.showLoading = false
@@ -88,6 +90,7 @@ class MainActivity : BaseActivity() {
             }
             swipe_to_refresh_list.isRefreshing = false
             activityMainBinding.showLoading = false
+            EspressoIdlingResource.decrement() // This used for only Espresso UI test cases, we can disable it in release build
         })
     }
 

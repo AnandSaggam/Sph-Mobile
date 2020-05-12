@@ -12,7 +12,7 @@ import kotlinx.coroutines.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.util.logging.Logger
+import timber.log.Timber
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -23,7 +23,6 @@ class RepositoryImpl(
     private val apiServiceInstance: IApiServiceMethods,
     private val netManager: NetManager
 ) : CoroutineScope, IRepository {
-    private val logger = Logger.getLogger("com.dlminfosoft.sphmobile")
 
     /**
      * Insert list of records in YearlyRecords table
@@ -34,7 +33,7 @@ class RepositoryImpl(
             launch {
                 withContext(Dispatchers.IO) {
                     val result = yearlyRecordDao.insertAll(yearlyRecordDataList)
-                    logger.info("Number of record inserted result: ${result.size}")
+                    Timber.d("Number of record inserted result: ${result.size}")
                 }
             }
         }
@@ -46,7 +45,7 @@ class RepositoryImpl(
     override fun deleteAllRecord() {
         runBlocking {
             val result = yearlyRecordDao.deleteAllRecords()
-            logger.info("Number of record deleted result: $result")
+            Timber.d("Number of record deleted result: $result")
         }
     }
 

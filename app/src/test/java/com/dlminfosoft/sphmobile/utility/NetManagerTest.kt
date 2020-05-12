@@ -11,6 +11,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.`when`
 
+/**
+ * This class contains unit test for internet connectivity check
+ */
+@Suppress("DEPRECATION")
 @RunWith(AndroidJUnit4::class)
 class NetManagerTest {
     private lateinit var context: Context

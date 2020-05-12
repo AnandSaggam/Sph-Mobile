@@ -3,6 +3,7 @@ package com.dlminfosoft.sphmobile.utility
 import android.content.Context
 import android.net.ConnectivityManager
 
+@Suppress("DEPRECATION")
 class NetManager(private var applicationContext: Context) {
 
     /**
