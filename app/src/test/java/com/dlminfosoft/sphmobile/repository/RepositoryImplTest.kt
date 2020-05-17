@@ -13,6 +13,8 @@ import com.dlminfosoft.sphmobile.TestUtils.getDummyYearlyRecordList
 import com.dlminfosoft.sphmobile.TestUtils.provideOkHttpClient
 import com.dlminfosoft.sphmobile.database.SphMobileDatabase
 import com.dlminfosoft.sphmobile.database.YearlyRecordDao
+import com.dlminfosoft.sphmobile.utility.Constants
+import com.dlminfosoft.sphmobile.utility.LocalizationInfoProvider
 import com.dlminfosoft.sphmobile.utility.NetManager
 import com.dlminfosoft.sphmobile.webservice.IApiServiceMethods
 import com.nhaarman.mockitokotlin2.*
@@ -50,10 +52,12 @@ class RepositoryImplTest : CoroutineScope {
     private lateinit var netManager: NetManager
     private lateinit var db: SphMobileDatabase
     private lateinit var dbDao: YearlyRecordDao
+    private lateinit var localization: LocalizationInfoProvider
 
     @Before
     fun setup() {
         netManager = mock()
+        localization = mock()
         val retrofit = Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
@@ -68,7 +72,7 @@ class RepositoryImplTest : CoroutineScope {
             .allowMainThreadQueries()
             .build()
         dbDao = spy(db.getYearlyRecordDao())
-        repository = RepositoryImpl(dbDao, apiService, netManager)
+        repository = RepositoryImpl(dbDao, apiService, netManager, localization)
         Dispatchers.setMain(testDispatcher)
     }
 
@@ -85,7 +89,7 @@ class RepositoryImplTest : CoroutineScope {
         val actualResult = apiService.getDataUsageDetails(SUCCESS_RESULT).execute()
         Assert.assertNotNull(actualResult)
         Assert.assertEquals(true, actualResult.isSuccessful)
-        Assert.assertEquals(200, actualResult.code())
+        Assert.assertEquals(Constants.STATUS_CODE_SUCCESS, actualResult.code())
     }
 
     @Test
@@ -94,7 +98,7 @@ class RepositoryImplTest : CoroutineScope {
         val actualResult = apiService.getDataUsageDetails(SUCCESS_RESULT).execute()
         Assert.assertNotNull(actualResult)
         Assert.assertEquals(true, actualResult.isSuccessful)
-        Assert.assertEquals(200, actualResult.code())
+        Assert.assertEquals(Constants.STATUS_CODE_SUCCESS, actualResult.code())
         Assert.assertEquals(true, actualResult.body()?.success)
         Assert.assertEquals(true, actualResult.body()?.result?.records?.isNotEmpty())
         Assert.assertEquals(5, actualResult.body()?.result?.records?.size)
@@ -114,30 +118,26 @@ class RepositoryImplTest : CoroutineScope {
         whenever(netManager.isConnectedToInternet).thenReturn(true)
         val actualResult = apiService.getDataUsageDetails(FAILURE_RESULT).execute()
         Assert.assertNotNull(actualResult)
-        Assert.assertEquals(500, actualResult.code())
+        Assert.assertEquals(Constants.STATUS_CODE_FAILURE, actualResult.code())
         Assert.assertNull(actualResult.body())
     }
 
     @Test
-    fun `verify_makeCallToGetYearlyRecords()_return_no_record_when_internet_not_available`() {
+    fun `verify_fetchDataFromServerOrDb()_return_no_record_when_internet_not_available`() {
         whenever(netManager.isConnectedToInternet).thenReturn(false)
-        val actualResult = repository.makeCallToGetYearlyRecords()
-        Assert.assertEquals(true, actualResult.value?.isSuccess)
-        Assert.assertEquals(false, actualResult.value?.isInternetAvailable)
-        Assert.assertEquals(true, actualResult.value?.recordList?.isEmpty())
+        val actualResult = repository.fetchDataFromServerOrDb()
+        Assert.assertNull(actualResult.value?.yearlyRecordListLiveData?.value)
     }
 
     @Test
-    fun `verify_makeCallToGetYearlyRecords()_return_record_from_database_when_internet_not_available`() {
+    fun `verify_fetchDataFromServerOrDb()_return_record_from_database_when_internet_not_available`() {
         whenever(netManager.isConnectedToInternet).thenReturn(false)
         testDispatcher.runBlockingTest {
             repository.insertIntoTable(getDummyYearlyRecordList())
-            val actualResult = repository.makeCallToGetYearlyRecords()
-            Assert.assertEquals(true, actualResult.value?.isSuccess)
-            Assert.assertEquals(false, actualResult.value?.isInternetAvailable)
+            val actualResult = repository.fetchDataFromServerOrDb()
             Assert.assertEquals(
                 getDummyYearlyRecordList().size,
-                actualResult.value?.recordList?.size
+                actualResult.value?.yearlyRecordListLiveData?.value?.size
             )
         }
     }

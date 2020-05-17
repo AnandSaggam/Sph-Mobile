@@ -6,15 +6,6 @@ import com.dlminfosoft.sphmobile.utility.Constants
 import java.util.*
 
 /**
- * This class hold list of each year data and api result
- */
-data class YearlyRecordResult(
-    val isSuccess: Boolean,
-    val recordList: List<YearlyRecord>,
-    val isInternetAvailable: Boolean
-)
-
-/**
  * This class hold value of each year data
  */
 @Entity(tableName = Constants.YEARLY_RECORD_TABLE_NAME)

@@ -2,10 +2,12 @@ package com.dlminfosoft.sphmobile.repository
 
 import androidx.lifecycle.MutableLiveData
 import com.dlminfosoft.sphmobile.database.YearlyRecordDao
+import com.dlminfosoft.sphmobile.model.MainApiResponse
 import com.dlminfosoft.sphmobile.model.UsageDataResponse
 import com.dlminfosoft.sphmobile.model.YearlyRecord
-import com.dlminfosoft.sphmobile.model.YearlyRecordResult
-import com.dlminfosoft.sphmobile.repository.UseCaseRepository.getYearlyRecordResult
+import com.dlminfosoft.sphmobile.repository.UseCaseRepository.getYearlyRecordList
+import com.dlminfosoft.sphmobile.utility.Constants
+import com.dlminfosoft.sphmobile.utility.LocalizationInfoProvider
 import com.dlminfosoft.sphmobile.utility.NetManager
 import com.dlminfosoft.sphmobile.webservice.IApiServiceMethods
 import kotlinx.coroutines.*
@@ -21,7 +23,8 @@ import kotlin.coroutines.CoroutineContext
 class RepositoryImpl(
     private val yearlyRecordDao: YearlyRecordDao,
     private val apiServiceInstance: IApiServiceMethods,
-    private val netManager: NetManager
+    private val netManager: NetManager,
+    private val localizationProvider: LocalizationInfoProvider
 ) : CoroutineScope, IRepository {
 
     /**
@@ -65,8 +68,10 @@ class RepositoryImpl(
     /**
      * If network available fetch data from server else fetch from local database
      */
-    override fun makeCallToGetYearlyRecords(): MutableLiveData<YearlyRecordResult> {
-        val responseLiveData = MutableLiveData<YearlyRecordResult>()
+    override fun fetchDataFromServerOrDb(): MutableLiveData<MainApiResponse> {
+        val mainApiResponse =
+            MutableLiveData(MainApiResponse(MutableLiveData(), MutableLiveData()))
+
         if (netManager.isConnectedToInternet) {
             apiServiceInstance.getDataUsageDetails()
                 .enqueue(object : Callback<UsageDataResponse> {
@@ -74,33 +79,59 @@ class RepositoryImpl(
                         call: Call<UsageDataResponse>,
                         response: Response<UsageDataResponse>
                     ) {
-                        val recordResult: YearlyRecordResult =
-                            getYearlyRecordResult(response.body())
-                        responseLiveData.value = recordResult
+                        if (response.code() == Constants.STATUS_CODE_SUCCESS && response.body() != null) {
+                            val recordList: List<YearlyRecord> =
+                                getYearlyRecordList(response.body()!!)
 
-                        launch {
-                            withContext(Dispatchers.Default) {
-                                deleteAllRecord()
+                            if (recordList.isNotEmpty()) {
+                                mainApiResponse.value?.yearlyRecordListLiveData?.value =
+                                    recordList
+                                launch {
+                                    withContext(Dispatchers.Default) {
+                                        deleteAllRecord()
+                                    }
+                                    insertIntoTable(recordList)
+                                }
+                            } else {
+                                mainApiResponse.value?.errorLiveData?.value =
+                                    Error(localizationProvider.getEmptyListMessage())
                             }
-                            insertIntoTable(recordResult.recordList)
+                        } else {
+                            Timber.d("onResponse: Something went wrong")
+                            mainApiResponse.value?.errorLiveData?.value =
+                                Error(localizationProvider.getSomethingWrongMessage())
                         }
                     }
 
-                    override fun onFailure(call: Call<UsageDataResponse>, t: Throwable) {
-                        responseLiveData.value = null
+                    override fun onFailure(
+                        call: Call<UsageDataResponse>,
+                        t: Throwable
+                    ) {
+                        Timber.d("OnFailure: ${t.message.toString()}")
+                        val errorLiveData = MutableLiveData<Error>()
+                        errorLiveData.value = Error(t.message.toString())
+                        mainApiResponse.value?.errorLiveData?.value =
+                            Error(t.message.toString())
                     }
                 })
         } else {
             // Launching background thread using coroutines
             launch {
-                val result = getAllRecordsFromTable()
+                // Fetch data from local database
+                val recordList = getAllRecordsFromTable()
                 withContext(Dispatchers.Main) {
-                    responseLiveData.value =
-                        YearlyRecordResult(true, result, false)
+                    if (recordList.isNotEmpty()) {
+                        Timber.d("Display data from local database: ${recordList.size}")
+                        mainApiResponse.value?.yearlyRecordListLiveData?.value = recordList
+                    } else {
+                        Timber.d("Internet connection not available")
+                        mainApiResponse.value?.errorLiveData?.value =
+                            Error(localizationProvider.getNoInternetMessage())
+                    }
                 }
             }
         }
-        return responseLiveData
+        return mainApiResponse
     }
 
     override val coroutineContext: CoroutineContext

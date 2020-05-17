@@ -2,7 +2,7 @@ package com.dlminfosoft.sphmobile.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.dlminfosoft.sphmobile.model.YearlyRecordResult
+import com.dlminfosoft.sphmobile.model.MainApiResponse
 import com.dlminfosoft.sphmobile.repository.RepositoryImpl
 
 /**
@@ -11,23 +11,25 @@ import com.dlminfosoft.sphmobile.repository.RepositoryImpl
 class MainViewModelImpl(private val repoInstance: RepositoryImpl) :
     ViewModel(), IMainViewModel {
 
-    private var dataUsageResponseYearlyRecord = MutableLiveData<YearlyRecordResult>()
+    private var mainResponseLiveData = MutableLiveData<MainApiResponse>()
 
     init {
-        getListOfData()
+        fetchDataFromRepo()
     }
 
     /**
-     *  Invoke to repository method callDataUsageApi() for api call
+     *  Invoke to repository method fetchDataFromServerOrDb() to get data
      */
-    override fun getListOfData() {
-        dataUsageResponseYearlyRecord = repoInstance.makeCallToGetYearlyRecords()
+    override fun fetchDataFromRepo() {
+        mainResponseLiveData = repoInstance.fetchDataFromServerOrDb()
     }
 
     /**
-     *  This method return observable liveData of YearlyRecordList
+     *  This method return observable liveData of MainApiResponse
      */
-    override fun yearlyRecordListObservable(): MutableLiveData<YearlyRecordResult> {
-        return dataUsageResponseYearlyRecord
+    override fun getObservableMainApiResponse(): MutableLiveData<MainApiResponse> {
+        return mainResponseLiveData
     }
+
+
 }

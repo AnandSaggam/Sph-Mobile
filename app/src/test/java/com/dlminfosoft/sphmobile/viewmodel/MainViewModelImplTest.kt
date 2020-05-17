@@ -3,7 +3,7 @@ package com.dlminfosoft.sphmobile.viewmodel
 import androidx.lifecycle.MutableLiveData
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.dlminfosoft.sphmobile.TestUtils
-import com.dlminfosoft.sphmobile.model.YearlyRecordResult
+import com.dlminfosoft.sphmobile.model.MainApiResponse
 import com.dlminfosoft.sphmobile.repository.RepositoryImpl
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.times
@@ -29,53 +29,108 @@ class MainViewModelImplTest {
     }
 
     @Test
-    fun `test_verify_makeCallToGetYearlyRecords()_invoke`() {
+    fun `test_verify_fetchDataFromServerOrDb()_invoke`() {
         mainViewModel = MainViewModelImpl(repository)
-        Mockito.verify(repository, times(1)).makeCallToGetYearlyRecords()
+        Mockito.verify(repository, times(1)).fetchDataFromServerOrDb()
     }
 
     @Test
-    fun test_check_yearlyRecordListObservable_returns_null() {
+    fun `test_check_fetchDataFromServerOrDb()_returns_null`() {
         mainViewModel = MainViewModelImpl(repository)
-        whenever(repository.makeCallToGetYearlyRecords()).thenReturn(
+        whenever(repository.fetchDataFromServerOrDb()).thenReturn(
             MutableLiveData()
         )
-        mainViewModel.getListOfData()
-        val result = mainViewModel.yearlyRecordListObservable().value
+        mainViewModel.fetchDataFromRepo()
+        val result = mainViewModel.getObservableMainApiResponse().value
         assertNull(result)
     }
 
     @Test
-    fun test_check_yearlyRecordListObservable_returns_YearlyRecordResult() {
+    fun test_check_mainResponseLiveData_returns_list_of_YearlyRecord() {
+        mainViewModel = MainViewModelImpl(repository)
+        val expectedValue = TestUtils.getDummyYearlyRecordList()
+        whenever(repository.fetchDataFromServerOrDb()).thenReturn(
+            MutableLiveData(
+                MainApiResponse(
+                    MutableLiveData(TestUtils.getDummyYearlyRecordList()), MutableLiveData()
+                )
+            )
+        )
+
+        mainViewModel.fetchDataFromRepo()
+        val result =
+            mainViewModel.getObservableMainApiResponse().value?.yearlyRecordListLiveData?.value
+        assertNotNull(result)
+        assertEquals(expectedValue, result)
+        assertEquals(expectedValue.size, result?.size)
+    }
+
+    @Test
+    fun test_check_mainResponseLiveData_returns_empty_list_with_error_msg_no_data() {
+        mainViewModel = MainViewModelImpl(repository)
+        whenever(repository.fetchDataFromServerOrDb()).thenReturn(
+            MutableLiveData(
+                MainApiResponse(
+                    MutableLiveData(ArrayList()),
+                    MutableLiveData(Error("No records available to display"))
+                )
+            )
+        )
+
+        mainViewModel.fetchDataFromRepo()
+        val resultErrorMsg =
+            mainViewModel.getObservableMainApiResponse()
+                .value?.errorLiveData?.value?.message.toString()
+        assertTrue(
+            mainViewModel.getObservableMainApiResponse().value?.yearlyRecordListLiveData?.value?.isEmpty()
+                ?: false
+        )
+        assertEquals("No records available to display", resultErrorMsg)
+    }
+
+    @Test
+    fun test_check_mainResponseLiveData_returns_Error_liveData_with_no_internet_message() {
         // Arrange
         mainViewModel = MainViewModelImpl(repository)
-        val expectedValue = YearlyRecordResult(true, ArrayList(), true)
-        whenever(repository.makeCallToGetYearlyRecords()).thenReturn(
+        whenever(repository.fetchDataFromServerOrDb()).thenReturn(
             MutableLiveData(
-                YearlyRecordResult(true, ArrayList(), true)
+                MainApiResponse(
+                    MutableLiveData(),
+                    MutableLiveData(Error("Please check internet connection and try again"))
+                )
             )
         )
 
         // Act
-        mainViewModel.getListOfData()
-        val result = mainViewModel.yearlyRecordListObservable().value
+        mainViewModel.fetchDataFromRepo()
+        val result =
+            mainViewModel.getObservableMainApiResponse()
+                .value?.errorLiveData?.value?.message.toString()
 
         // Assert
         assertNotNull(result)
-        assertEquals(expectedValue, result)
+        assertEquals("Please check internet connection and try again", result)
     }
 
     @Test
-    fun test_check_yearlyRecordListObservable_returns_YearlyRecordResult_with_YearlyRecord_list() {
+    fun test_check_mainResponseLiveData_returns_Error_liveData_with_something_wrong_message() {
+        // Arrange
         mainViewModel = MainViewModelImpl(repository)
-        val expectedValue = YearlyRecordResult(true, TestUtils.getDummyYearlyRecordList(), true)
-        whenever(repository.makeCallToGetYearlyRecords()).thenReturn(
-            MutableLiveData(YearlyRecordResult(true, TestUtils.getDummyYearlyRecordList(), true))
+        whenever(repository.fetchDataFromServerOrDb()).thenReturn(
+            MutableLiveData(
+                MainApiResponse(
+                    MutableLiveData(),
+                    MutableLiveData(Error("Something went wrong please try again"))
+                )
+            )
         )
 
-        mainViewModel.getListOfData()
-        val result = mainViewModel.yearlyRecordListObservable().value
+        // Act
+        mainViewModel.fetchDataFromRepo()
+        val result = mainViewModel.getObservableMainApiResponse()
+            .value?.errorLiveData?.value?.message.toString()
+        // Assert
         assertNotNull(result)
-        assertEquals(expectedValue, result)
+        assertEquals("Something went wrong please try again", result)
     }
 }

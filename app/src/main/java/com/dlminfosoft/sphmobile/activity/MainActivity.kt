@@ -29,7 +29,8 @@ class MainActivity : BaseActivity() {
     }
 
     /**
-     *  Lambda function pass as argument in adapter to show alert dialog
+     *  Lambda function pass as argument in adapter to show alert dialog,
+     *  alternatively we can pass viewModel instance in adapter, and observe when to saw dialog in view
      */
     private var performOnImgBtnClick = { record: YearlyRecord ->
         val value = record.treeMapWithDataUsage.getValue(record.decreaseVolumeQuarterKey)
@@ -73,25 +74,37 @@ class MainActivity : BaseActivity() {
      */
     private fun loadData(isFromSwipeToRefresh: Boolean) {
         activityMainBinding.showLoading = !isFromSwipeToRefresh
-        if (isFromSwipeToRefresh) mainViewModelImpl.getListOfData()
+        if (isFromSwipeToRefresh) mainViewModelImpl.fetchDataFromRepo()
 
-        mainViewModelImpl.yearlyRecordListObservable().observe(this, Observer { response ->
-            if (response != null && response.isSuccess) {
-                if (response.recordList.isNotEmpty()) {
-                    yearlyRecordList = response.recordList.toMutableList()
-                    mAdapter.setDataList(yearlyRecordList)
-                } else if (response.recordList.isEmpty() && !response.isInternetAvailable) {
-                    showSnackBar(getString(R.string.no_internet))
-                } else {
-                    showSnackBar(getString(R.string.no_record_available))
-                }
-            } else {
-                showSnackBar(getString(R.string.something_went_wrong))
-            }
-            swipe_to_refresh_list.isRefreshing = false
-            activityMainBinding.showLoading = false
-            EspressoIdlingResource.decrement() // This used for only Espresso UI test cases, we can disable it in release build
-        })
+        /**
+         *  this Observer invoke whenever there is list of records available
+         */
+        mainViewModelImpl.getObservableMainApiResponse().value?.yearlyRecordListLiveData?.observe(
+            this,
+            Observer {
+                yearlyRecordList = it.toMutableList()
+                mAdapter.setDataList(yearlyRecordList)
+                hideLoading()
+            })
+
+        /**
+         *  this Observer invoke whenever there is any error message
+         */
+        mainViewModelImpl.getObservableMainApiResponse().value?.errorLiveData?.observe(
+            this,
+            Observer {
+                showSnackBar(it.message.toString())
+                hideLoading()
+            })
+    }
+
+    /**
+     *  this method executed after Observer gets invoke
+     */
+    private fun hideLoading() {
+        swipe_to_refresh_list.isRefreshing = false
+        activityMainBinding.showLoading = false
+        EspressoIdlingResource.decrement() // This used for only Espresso UI test cases, we can disable it in release build
     }
 
     /**

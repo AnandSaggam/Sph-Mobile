@@ -1,6 +1,9 @@
 package com.dlminfosoft.sphmobile
 
-import com.dlminfosoft.sphmobile.model.*
+import com.dlminfosoft.sphmobile.model.RecordsData
+import com.dlminfosoft.sphmobile.model.ResultData
+import com.dlminfosoft.sphmobile.model.UsageDataResponse
+import com.dlminfosoft.sphmobile.model.YearlyRecord
 import com.dlminfosoft.sphmobile.repository.MockInterceptor
 import okhttp3.OkHttpClient
 import java.util.*
@@ -29,7 +32,7 @@ object TestUtils {
         return yearlyRecordDataList
     }
 
-    private fun getRecordsDataList(): ArrayList<RecordsData> {
+    private fun getRecordsDataQuarterList(): ArrayList<RecordsData> {
         val recordList = ArrayList<RecordsData>()
         recordList.add(RecordsData(1, "2012-Q1", 3.0))
         recordList.add(RecordsData(2, "2012-Q2", 4.0))
@@ -42,17 +45,16 @@ object TestUtils {
         return ArrayList()
     }
 
-
     fun getDummyUsageDataResponse(): UsageDataResponse {
-        val recordsDataList = ResultData(getRecordsDataList(), 4)
+        val recordsDataList = ResultData(getRecordsDataQuarterList(), 4)
         return UsageDataResponse(true, recordsDataList)
     }
 
-    fun getDummyYearlyRecordResultSuccess(): YearlyRecordResult {
-        return YearlyRecordResult(true, getDummyYearlyRecordList(), true)
+    fun getDummyYearlyRecordResultSuccess(): ArrayList<YearlyRecord> {
+        return getDummyYearlyRecordList()
     }
 
-    fun getDummyUsageDataResponseFailureCase(): UsageDataResponse {
+    fun getDummyUsageDataResponseWithEmptyList(): UsageDataResponse {
         return UsageDataResponse(false, ResultData(ArrayList(), 0))
     }
 
